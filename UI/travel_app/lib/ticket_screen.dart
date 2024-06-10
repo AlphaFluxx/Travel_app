@@ -1,6 +1,21 @@
 import 'package:flutter/material.dart';
 
 class TicketScreen extends StatelessWidget {
+  final String asal;
+  final String tujuan;
+  final int date;
+  final String time;
+  final int seat;
+
+  const TicketScreen({
+    super.key,
+    required this.asal,
+    required this.tujuan,
+    required this.date,
+    required this.time,
+    required this.seat,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,9 +56,9 @@ class TicketScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Jogjakarta',
-                        style: TextStyle(
+                      Text(
+                        asal,
+                        style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(
@@ -55,9 +70,9 @@ class TicketScreen extends StatelessWidget {
                       ),
                       const SizedBox(
                           width: 8), // Adjust spacing between image and text
-                      const Text(
-                        'Semarang',
-                        style: TextStyle(
+                      Text(
+                        tujuan,
+                        style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -73,31 +88,35 @@ class TicketScreen extends StatelessWidget {
                     'Nama',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
-                  const Text('Ahmad Farhan Nugraha'),
+                  Text("farhan"),
                   const SizedBox(height: 10),
                   const Text(
                     'Tanggal',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
-                  const Text('Mei 3, 2024'),
+                  Text('Mei $date, 2024'),
                   const SizedBox(height: 10),
                   const Text(
                     'Waktu',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
-                  const Text('08.00 AM - 11.00 AM'),
+                  Text(time),
                   const SizedBox(height: 10),
                   const Text(
                     'Pickup - Drop Point',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
-                  const Text('Town Hall Jogjakarta - Town Hall Semarang'),
+                  Text(
+                    'Town Hall $asal - Town Hall $tujuan',
+                    style: const TextStyle(
+                        fontSize: 14),
+                  ),
                   const SizedBox(height: 10),
                   const Text(
                     'Tempat duduk',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
-                  const Text('3'),
+                  Text(seat.toString()),
                 ],
               ),
             ),

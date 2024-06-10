@@ -1,10 +1,16 @@
+// loginscreen.dart
 import 'package:flutter/material.dart';
 import 'package:travel_app/main.dart';
 import 'package:travel_app/signupscreen.dart'; // Import SignUpScreen
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:travel_app/dummydata.dart'; // Import dummy data
 
 class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final TextEditingController usernameController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -63,32 +69,34 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        _buildTextField('Username', 'assets/icon/person.png'),
+                        _buildTextField('Username', 'assets/icon/person.png',
+                            controller: usernameController),
                         const SizedBox(height: 16),
                         _buildTextField('Password', 'assets/icon/lock.png',
-                            isPassword: true),
+                            isPassword: true, controller: passwordController),
                         const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                // Handle forgot password tap
-                              },
-                              child: const Text(
-                                'Forgot Password?',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => HomeScreen()),
-                            );
+                            if (isValidUser(usernameController.text, //kode untuk verifikasi user
+                                passwordController.text)) {
+                              Fluttertoast.showToast(
+                                msg: "Login Successful",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                              // Navigate to Home or Main Screen
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => HomeScreen()),
+                              );
+                            } else {
+                              Fluttertoast.showToast(
+                                msg: "Invalid Username or Password",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF10E0ED),
@@ -101,33 +109,28 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        const Text(
-                          'or',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildSocialButton(Colors.red),
-                            const SizedBox(width: 10),
-                            _buildSocialButton(Colors.yellow),
-                            const SizedBox(width: 10),
-                            _buildSocialButton(Colors.blue),
+                            const Text("Don't have an account?"),
+                            const SizedBox(width: 5),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SignUpScreen()),
+                                );
+                              },
+                              child: const Text(
+                                "Register",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ],
-                        ),
-                        const SizedBox(height: 10),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => SignUpScreen()),
-                            );
-                          },
-                          child: const Text(
-                            "Don't have an account? Register",
-                            style: TextStyle(color: Colors.black),
-                          ),
                         ),
                       ],
                     ),
@@ -142,18 +145,15 @@ class LoginScreen extends StatelessWidget {
   }
 
   Widget _buildTextField(String hint, String iconPath,
-      {bool isPassword = false}) {
+      {bool isPassword = false, required TextEditingController controller}) {
     return TextField(
+      controller: controller,
       obscureText: isPassword,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Container(
           padding: const EdgeInsets.all(10),
-          child: Image.asset(
-            iconPath,
-            width: 20,
-            height: 20,
-          ),
+          child: Image.asset(iconPath, width: 20, height: 20),
         ),
         filled: true,
         fillColor: Colors.grey[200],
@@ -164,17 +164,6 @@ class LoginScreen extends StatelessWidget {
         hintStyle: const TextStyle(color: Colors.grey),
       ),
       style: const TextStyle(color: Colors.black),
-    );
-  }
-
-  Widget _buildSocialButton(Color color) {
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(10),
-      ),
     );
   }
 }

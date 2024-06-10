@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:travel_app/loginscreen.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:travel_app/dummydata.dart';
 
 class SignUpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController usernameController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -54,19 +60,21 @@ class SignUpScreen extends StatelessWidget {
                       children: [
                         const SizedBox(height: 20),
                         const Text(
-                          'hello!',
+                          'Hello!',
                           style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.black),
                         ),
                         const SizedBox(height: 20),
-                        _buildTextField('Username', 'assets/icon/person.png'),
+                        _buildTextField('Username', 'assets/icon/person.png',
+                            controller: usernameController),
                         const SizedBox(height: 16),
-                        _buildTextField('Email', 'assets/icon/email.png'),
+                        _buildTextField('Email', 'assets/icon/email.png',
+                            controller: emailController),
                         const SizedBox(height: 16),
                         _buildTextField('Password', 'assets/icon/lock.png',
-                            isPassword: true),
+                            isPassword: true, controller: passwordController),
                         const SizedBox(height: 16),
                         Row(
                           children: [
@@ -88,11 +96,25 @@ class SignUpScreen extends StatelessWidget {
                         const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginScreen()),
-                            );
+                            if (isEmailInUse(emailController.text)) {
+                              Fluttertoast.showToast(
+                                msg: "Email sudah digunakan",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                            } else if (isUsernameInUse(usernameController.text)) {
+                              Fluttertoast.showToast(
+                                msg: "Username sudah digunakan",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginScreen()),
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF10E0ED),
@@ -147,8 +169,9 @@ class SignUpScreen extends StatelessWidget {
   }
 
   Widget _buildTextField(String hint, String iconPath,
-      {bool isPassword = false}) {
+      {bool isPassword = false, required TextEditingController controller}) {
     return TextField(
+      controller: controller,
       obscureText: isPassword,
       decoration: InputDecoration(
         hintText: hint,

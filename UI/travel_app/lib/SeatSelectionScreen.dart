@@ -1,11 +1,22 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'jadwal.dart';
 import 'payment.dart';
+import 'ticket_screen.dart'; // Import TicketScreen
+import 'package:fluttertoast/fluttertoast.dart'; // Import Fluttertoast
 
 class SeatSelectionScreen extends StatefulWidget {
-  const SeatSelectionScreen({super.key});
+  final String asal;
+  final String tujuan;
+  final int date;
+  final String time;
+
+  const SeatSelectionScreen({
+    super.key,
+    required this.asal,
+    required this.tujuan,
+    required this.date,
+    required this.time,
+  });
 
   @override
   _SeatSelectionScreenState createState() => _SeatSelectionScreenState();
@@ -33,7 +44,12 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => Jadwal()),
+                MaterialPageRoute(
+                  builder: (context) => Jadwal(
+                    asal: widget.asal,
+                    tujuan: widget.tujuan,
+                  ),
+                ),
               );
             },
             backgroundColor: const Color(0xFF1A1B1F), // Background color of FAB
@@ -84,7 +100,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      "08:00 AM - 11:00 AM",
+                      widget.time,
                       style: TextStyle(color: Colors.grey),
                     ),
                   ],
@@ -92,11 +108,11 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                 Column(
                   children: [
                     Text(
-                      " Jogjakarta",
+                      widget.asal,
                       style: TextStyle(color: Colors.white),
                     ),
                     Text(
-                      " Semarang",
+                      widget.tujuan,
                       style: TextStyle(color: Colors.white),
                     ),
                   ],
@@ -125,27 +141,36 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                   if (index == 2) {
                     return Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Driver",
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ),
-                    );
-                  } else if (index == 4 || index == 7 || index == 8) {
-                    return Container(
-                      decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       child: Center(
                         child: Text(
-                          (index + 1).toString(),
-                          style: TextStyle(
-                            color: Colors.white,
+                          "Driver",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    );
+                  } else if (index == 4 || index == 7 || index == 8) {
+                    return GestureDetector(
+                      onTap: () {
+                        Fluttertoast.showToast(
+                          msg: "Seat tidak tersedia",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Center(
+                          child: Text(
+                            (index + 1).toString(),
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -200,10 +225,26 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => PaymentScreen()),
-                );
+                if (selectedSeat != -1) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PaymentMethodScreen(
+                        asal: widget.asal,
+                        tujuan: widget.tujuan,
+                        date: widget.date,
+                        time: widget.time,
+                        seat: selectedSeat + 1,
+                      ),
+                    ),
+                  );
+                } else {
+                  Fluttertoast.showToast(
+                    msg: "Pilih kursi terlebih dahulu",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                  );
+                }
               },
               style: TextButton.styleFrom(
                   backgroundColor: Color(0xFF12D1DD),

@@ -1,6 +1,7 @@
-// custom_bottom_navigation_bar.dart
-
 import 'package:flutter/material.dart';
+import 'package:travel_app/historyScreen.dart';
+import 'main.dart'; // Impor MyApp.dart file
+import 'ProfileScreen.dart'; // Impor ProfileScreen.dart
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;
@@ -11,6 +12,29 @@ class CustomBottomNavigationBar extends StatelessWidget {
     required this.selectedIndex,
     required this.onItemTapped,
   }) : super(key: key);
+
+  void _navigateToPage(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+        break;
+      case 1:
+      Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HistoryScreen()),
+        );
+        break;
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ProfileScreen()),
+        );
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,15 +47,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
             AssetImage('assets/icon/home.png'),
             color: Colors.white,
           ),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          backgroundColor: Colors.black,
-          icon: ImageIcon(
-            AssetImage('assets/icon/ticket.png'),
-            color: Colors.white,
-          ),
-          label: 'Ticket',
+          label: 'Beranda',
         ),
         BottomNavigationBarItem(
           backgroundColor: Colors.black,
@@ -39,7 +55,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
             AssetImage('assets/icon/history.png'),
             color: Colors.white,
           ),
-          label: 'History',
+          label: 'Riwayat',
         ),
         BottomNavigationBarItem(
           backgroundColor: Colors.black,
@@ -47,7 +63,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
             AssetImage('assets/icon/profile.png'),
             color: Colors.white,
           ),
-          label: 'Profile',
+          label: 'Profil',
         ),
       ],
       currentIndex: selectedIndex,
@@ -59,7 +75,10 @@ class CustomBottomNavigationBar extends StatelessWidget {
       unselectedLabelStyle: const TextStyle(
         color: Colors.grey,
       ),
-      onTap: onItemTapped,
+      onTap: (index) {
+        onItemTapped(index);
+        _navigateToPage(context, index);
+      },
     );
   }
 }

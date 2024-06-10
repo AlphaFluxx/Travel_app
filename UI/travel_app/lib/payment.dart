@@ -1,22 +1,53 @@
 import 'package:flutter/material.dart';
-import 'SeatSelectionScreen.dart';
-import 'ticket_screen.dart'; // Import the new TicketScreen
-
-void main() {
-  runApp(PaymentScreen());
-}
+import 'ticket_screen.dart';
 
 class PaymentScreen extends StatelessWidget {
+  final String asal;
+  final String tujuan;
+  final int date;
+  final String time;
+  final int seat;
+
+  const PaymentScreen({
+    super.key,
+    required this.asal,
+    required this.tujuan,
+    required this.date,
+    required this.time,
+    required this.seat,
+  });
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: PaymentMethodScreen(),
+      home: PaymentMethodScreen(
+        asal: asal,
+        tujuan: tujuan,
+        date: date,
+        time: time,
+        seat: seat,
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class PaymentMethodScreen extends StatefulWidget {
+  final String asal;
+  final String tujuan;
+  final int date;
+  final String time;
+  final int seat;
+
+  const PaymentMethodScreen({
+    super.key,
+    required this.asal,
+    required this.tujuan,
+    required this.date,
+    required this.time,
+    required this.seat,
+  });
+
   @override
   _PaymentMethodScreenState createState() => _PaymentMethodScreenState();
 }
@@ -39,20 +70,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
           margin: const EdgeInsets.all(8.0),
           child: FloatingActionButton(
             onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SeatSelectionScreen(),
-                ),
-              );
+              Navigator.pop(context);
             },
             backgroundColor: const Color(0xFF1A1B1F), // Background color of FAB
             foregroundColor: Colors.white, // Icon color of FAB
             tooltip: 'Back', // Tooltip on FAB hold
             shape: const CircleBorder(), // Circular shape
             child: ColorFiltered(
-              colorFilter:
-                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
               child: Image.asset('assets/icon/back.png'),
             ),
           ),
@@ -87,7 +112,13 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               },
             ),
             const Spacer(),
-            ConfirmButton(),
+            ConfirmButton(
+              asal: widget.asal,
+              tujuan: widget.tujuan,
+              date: widget.date,
+              time: widget.time,
+              seat: widget.seat,
+            ),
           ],
         ),
       ),
@@ -108,9 +139,7 @@ class PaymentMethodCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: isSelected
-            ? Colors.cyan
-            : Colors.white, // Update color based on selection
+        color: isSelected ? Colors.cyan : Colors.white,
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Row(
@@ -129,17 +158,13 @@ class PaymentMethodCard extends StatelessWidget {
             onPressed: onTap,
             style: OutlinedButton.styleFrom(
               side: BorderSide(
-                color: isSelected
-                    ? Colors.white
-                    : Colors.cyan, // Update border color
+                color: isSelected ? Colors.white : Colors.cyan,
               ),
             ),
             child: Text(
               'Cara Kerja',
               style: TextStyle(
-                color: isSelected
-                    ? Colors.white
-                    : Color(0xFF12D1DD), // Update text color
+                color: isSelected ? Colors.white : Color(0xFF12D1DD),
               ),
             ),
           ),
@@ -150,6 +175,21 @@ class PaymentMethodCard extends StatelessWidget {
 }
 
 class ConfirmButton extends StatelessWidget {
+  final String asal;
+  final String tujuan;
+  final int date;
+  final String time;
+  final int seat;
+
+  const ConfirmButton({
+    super.key,
+    required this.asal,
+    required this.tujuan,
+    required this.date,
+    required this.time,
+    required this.seat,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -157,7 +197,15 @@ class ConfirmButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => TicketScreen()),
+            MaterialPageRoute(
+              builder: (context) => TicketScreen(
+                asal: asal,
+                tujuan: tujuan,
+                date: date,
+                time: time,
+                seat: seat,
+              ),
+            ),
           );
         },
         style: ElevatedButton.styleFrom(

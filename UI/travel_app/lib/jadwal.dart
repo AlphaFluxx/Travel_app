@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:travel_app/main.dart';
+import 'CustomBottomNavigationBar.dart';
 import 'SeatSelectionScreen.dart';
-import 'main.dart'; // Import MyApp.dart file
-import 'CustomBottomNavigationBar.dart'; // Import the custom bottom navigation bar
-
-void main() {
-  // Ensure binding is initialized before making changes to SystemChrome
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Hide the status bar
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-
-  runApp(Jadwal());
-}
 
 class Jadwal extends StatefulWidget {
+  final String asal;
+  final String tujuan;
+
+  Jadwal({required this.asal, required this.tujuan});
+
   @override
   _JadwalState createState() => _JadwalState();
 }
 
 class _JadwalState extends State<Jadwal> {
   int _selectedIndex = 0;
-  int _selectedBoxIndex =
-      -1; // Add a variable to keep track of the selected box
+  int _selectedBoxIndex = -1;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -30,158 +24,142 @@ class _JadwalState extends State<Jadwal> {
     });
   }
 
-  void _navigateToPage(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => MyApp()),
-        );
-        break;
-      case 1:
-        // Navigate to ticket screen
-        break;
-      case 2:
-        // Navigate to history screen
-        break;
-      case 3:
-        // Navigate to profile screen
-        break;
-    }
+  String formatTime(int hour) {
+    return hour.toString().padLeft(2, '0') + ":00";
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor:
-            const Color(0xFF121111), // Set background color of Scaffold
-        body: Column(
-          children: [
-            Material(
-              color:
-                  const Color(0xFF121111), // Set background color of Material
-              child: Row(
-                children: [
-                  FloatingActionButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
-                      );
-                    },
-                    backgroundColor:
-                        const Color(0xFF1A1B1F), // Background color of FAB
-                    foregroundColor: Colors.white, // Icon color of FAB
-                    tooltip: 'Tambah Item', // Tooltip on FAB hold
-                    shape: const CircleBorder(), // Circular shape
-                    child: ColorFiltered(
-                      colorFilter:
-                          const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                      child: Image.asset('assets/icon/back.png'),
-                    ),
-                  ),
-                  const SizedBox(width: 20), // Add spacing between text and FAB
-                  const Text(
-                    "Jogja",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Sarabun',
-                      fontSize: 20,
-                    ),
-                  ),
-                  const SizedBox(
-                      width: 30), // Add spacing between text and image
-                  ColorFiltered(
+    return Scaffold(
+      backgroundColor: const Color(0xFF121111),
+      body: Column(
+        children: [
+          Material(
+            color: const Color(0xFF121111),
+            child: Row(
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                    );
+                  },
+                  backgroundColor: const Color(0xFF1A1B1F),
+                  foregroundColor: Colors.white,
+                  tooltip: 'Back',
+                  shape: const CircleBorder(),
+                  child: ColorFiltered(
                     colorFilter:
                         const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                    child: Image.asset(
-                      'assets/icon/next.png',
-                      width: 100, // Lebar gambar
-                      height: 50, // Tinggi gambar
-                    ),
+                    child: Image.asset('assets/icon/back.png'),
                   ),
-                  const Text(
-                    "Semarang",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Sarabun',
-                      fontSize: 20,
-                    ),
+                ),
+                const SizedBox(width: 20),
+                Text(
+                  widget.asal,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Sarabun',
+                    fontSize: 20,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 30),
+                ColorFiltered(
+                  colorFilter:
+                      const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                  child: Image.asset(
+                    'assets/icon/next.png',
+                    width: 100,
+                    height: 50,
+                  ),
+                ),
+                Text(
+                  widget.tujuan,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Sarabun',
+                    fontSize: 20,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20), // Add spacing below the Row
-            Container(
-              height: 60, // Set height of the ListView
-              child: ListView.builder(
-                //listview1
-                scrollDirection: Axis.horizontal,
-                itemCount: 8, // Number of items in the list
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedBoxIndex =
-                            index; // Update the selected box index
-                      });
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Container(
-                        width: 60,
-                        decoration: BoxDecoration(
-                          color: _selectedBoxIndex == index
-                              ? Colors.cyan
-                              : const Color(0xFF1A1B1F),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                "Mei",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Sarabun',
-                                  fontSize: 14,
-                                ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            height: 60,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 8,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedBoxIndex = index;
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Container(
+                      width: 60,
+                      decoration: BoxDecoration(
+                        color: _selectedBoxIndex == index
+                            ? Colors.cyan
+                            : const Color(0xFF1A1B1F),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Mei",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Sarabun',
+                                fontSize: 14,
                               ),
-                              Text(
-                                "${index + 1}",
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Sarabun',
-                                  fontSize: 14,
-                                ),
+                            ),
+                            Text(
+                              "${index + 1}",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Sarabun',
+                                fontSize: 14,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
-            const SizedBox(
-                height: 20), // Add spacing below the horizontal ListView
-            // Start of vertical ListView for schedules
-            Expanded(
+          ),
+          const SizedBox(height: 20),
+          Visibility(
+            visible: _selectedBoxIndex != -1,
+            child: Expanded(
               child: ListView.builder(
-                //listview2
-                itemCount: 6, // Number of schedule items
+                itemCount: 6,
                 itemBuilder: (context, index) {
+                  int startHour = 8 + index * 3;
+                  int endHour = startHour + 3;
+
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                const SeatSelectionScreen()), // Navigate to SeatSelectionScreen
+                          builder: (context) => SeatSelectionScreen(
+                            asal: widget.asal,
+                            tujuan: widget.tujuan,
+                            date: _selectedBoxIndex + 1,
+                            time:
+                                "${formatTime(startHour)} - ${formatTime(endHour)}",
+                          ),
+                        ),
                       );
                     },
                     child: Padding(
@@ -206,7 +184,7 @@ class _JadwalState extends State<Jadwal> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              "${14 - index * 3} Kursi Tersisa", // Dynamic seat availability
+                              "${14 - index * 3} Kursi Tersisa",
                               style: const TextStyle(
                                 color: Colors.grey,
                                 fontFamily: 'Sarabun',
@@ -217,49 +195,33 @@ class _JadwalState extends State<Jadwal> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Column(
+                                Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "Town Hall",
-                                      style: TextStyle(
+                                      widget.asal,
+                                      style: const TextStyle(
                                         color: Colors.white,
                                         fontFamily: 'Sarabun',
                                         fontSize: 16,
-                                      ),
-                                    ),
-                                    Text(
-                                      "Jogjakarta",
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                        fontFamily: 'Sarabun',
-                                        fontSize: 14,
                                       ),
                                     ),
                                   ],
                                 ),
                                 Image.asset(
-                                  'assets/icon/bus.png', // Change to your bus image path
+                                  'assets/icon/bus.png',
                                   width: 40,
                                   height: 40,
                                 ),
-                                const Column(
+                                Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      "Town Hall",
-                                      style: TextStyle(
+                                      widget.tujuan,
+                                      style: const TextStyle(
                                         color: Colors.white,
                                         fontFamily: 'Sarabun',
                                         fontSize: 16,
-                                      ),
-                                    ),
-                                    Text(
-                                      "Semarang",
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                        fontFamily: 'Sarabun',
-                                        fontSize: 14,
                                       ),
                                     ),
                                   ],
@@ -267,15 +229,34 @@ class _JadwalState extends State<Jadwal> {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Center(
-                              child: Text(
-                                "${index + 8}:00 AM - ${index + 11}:00 PM", // Dynamic time
-                                style: const TextStyle(
-                                  color: Colors.grey,
-                                  fontFamily: 'Sarabun',
-                                  fontSize: 14,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  formatTime(startHour),
+                                  style: const TextStyle(
+                                    color: Colors.cyan,
+                                    fontFamily: 'Sarabun',
+                                    fontSize: 16,
+                                  ),
                                 ),
-                              ),
+                                const Text(
+                                  "3 jam perjalanan",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontFamily: 'Sarabun',
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Text(
+                                  formatTime(endHour),
+                                  style: const TextStyle(
+                                    color: Colors.cyan,
+                                    fontFamily: 'Sarabun',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -285,16 +266,12 @@ class _JadwalState extends State<Jadwal> {
                 },
               ),
             ),
-            // End of vertical ListView for schedules
-          ],
-        ),
-        bottomNavigationBar: CustomBottomNavigationBar(
-          selectedIndex: _selectedIndex,
-          onItemTapped: (index) {
-            _onItemTapped(index);
-            _navigateToPage(context, index);
-          },
-        ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
       ),
     );
   }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fluttertoast/fluttertoast.dart'; // Tambahkan import untuk FlutterToast
 import 'package:travel_app/splashScreen.dart';
 import 'jadwal.dart';
-import 'CustomBottomNavigationBar.dart'; 
+import 'CustomBottomNavigationBar.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,8 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     tooltip: 'Tambah Item',
                     shape: const CircleBorder(),
                     child: ColorFiltered(
-                      colorFilter:
-                          const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                       child: Image.asset('assets/icon/bell-regular-24.png'),
                     ),
                   ),
@@ -94,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: TicketSearchForm(),
+              child: FormPencarianTiket(),
             ),
           ],
         ),
@@ -107,24 +106,70 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class TicketSearchForm extends StatelessWidget {
+class FormPencarianTiket extends StatefulWidget {
+  @override
+  _FormPencarianTiketState createState() => _FormPencarianTiketState();
+}
+
+class _FormPencarianTiketState extends State<FormPencarianTiket> {
+  String? _asalTerpilih;
+  String? _tujuanTerpilih;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildDropdownField('Pilih Asal', FontAwesomeIcons.planeDeparture,
-            Colors.blue, ['Jakarta', 'Surabaya', 'Bali']),
+        _bangunDropdownField(
+          'Pilih Asal',
+          'assets/icon/arah_biru.png',
+          Colors.blue,
+          ['Jogja', 'Solo', 'Semarang'],
+          _asalTerpilih,
+          (newValue) {
+            setState(() {
+              _asalTerpilih = newValue;
+            });
+          },
+        ),
         const SizedBox(height: 16),
-        _buildDropdownField('Pilih Tujuan', FontAwesomeIcons.planeArrival,
-            Colors.red, ['Jakarta', 'Surabaya', 'Bali']),
+        _bangunDropdownField(
+          'Pilih Tujuan',
+          'assets/icon/arah_merah.png',
+          Colors.red,
+          ['Jogja', 'Solo', 'Semarang'],
+          _tujuanTerpilih,
+          (newValue) {
+            setState(() {
+              _tujuanTerpilih = newValue;
+            });
+          },
+        ),
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => Jadwal()));
+              if (_asalTerpilih != null && _tujuanTerpilih != null) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => Jadwal(
+                      asal: _asalTerpilih!,
+                      tujuan: _tujuanTerpilih!,
+                    ),
+                  ),
+                );
+              } else {
+                // Tampilkan toast jika asal atau tujuan belum dipilih
+                Fluttertoast.showToast(
+                  msg: "Tolong pilih asal dan tujuan terlebih dahulu",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF10E0ED),
@@ -143,23 +188,42 @@ class TicketSearchForm extends StatelessWidget {
     );
   }
 
-  Widget _buildDropdownField(
-      String labelText, IconData icon, Color iconColor, List<String> items) {
-    return DropdownButtonFormField<String>(
+  Widget _bangunDropdownField(
+    String labelText,
+    String iconPath,
+    Color iconColor,
+    List<String> items,
+    String? selectedItem,
+    ValueChanged<String?> onChanged,
+  ) {
+    return InputDecorator(
       decoration: InputDecoration(
         labelText: labelText,
-        prefixIcon: FaIcon(icon, color: iconColor),
+        prefixIcon: ImageIcon(
+          AssetImage(iconPath),
+          color: iconColor,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      items: items.map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-      onChanged: (newValue) {},
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          value: selectedItem,
+          icon: ImageIcon(
+            AssetImage('assets/icon/panah_kanan.png'),
+            color: Colors.black,
+          ),
+          items: items.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
     );
   }
 }
