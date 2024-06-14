@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'jadwal.dart';
 import 'payment.dart';
-import 'ticket_screen.dart'; // Import TicketScreen
-import 'package:fluttertoast/fluttertoast.dart'; // Import Fluttertoast
+import 'package:fluttertoast/fluttertoast.dart'; 
 
 class SeatSelectionScreen extends StatefulWidget {
   final String asal;
@@ -52,10 +51,10 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                 ),
               );
             },
-            backgroundColor: const Color(0xFF1A1B1F), // Background color of FAB
-            foregroundColor: Colors.white, // Icon color of FAB
-            tooltip: 'Back', // Tooltip on FAB hold
-            shape: const CircleBorder(), // Circular shape
+            backgroundColor: const Color(0xFF1A1B1F), 
+            foregroundColor: Colors.white,
+            tooltip: 'Back', // 
+            shape: const CircleBorder(), 
             child: ColorFiltered(
               colorFilter:
                   const ColorFilter.mode(Colors.white, BlendMode.srcIn),
@@ -67,16 +66,16 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
       body: Column(
         children: [
           Container(
-            margin: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-            padding: EdgeInsets.all(16.0),
+            margin: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Color.fromRGBO(48, 46, 46, 1),
+              color: const Color.fromRGBO(48, 46, 46, 1),
               borderRadius: BorderRadius.circular(8.0),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
+                const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -94,14 +93,14 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                     Image.asset(
                       'assets/icon/bus.png', // Change to your garis image path
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Image.asset(
                       'assets/icon/garis.png', // Change to your garis image path
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       widget.time,
-                      style: TextStyle(color: Colors.grey),
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ],
                 ),
@@ -109,11 +108,11 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                   children: [
                     Text(
                       widget.asal,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
                     Text(
                       widget.tujuan,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ],
                 ),
@@ -122,10 +121,10 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
           ),
           Expanded(
             child: Container(
-              margin: EdgeInsets.symmetric(vertical: 20.0, horizontal: 30.0),
-              padding: EdgeInsets.all(16.0),
+              margin: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 30.0),
+              padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: Color.fromRGBO(48, 46, 46, 1),
+                color: const Color.fromRGBO(48, 46, 46, 1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: GridView.builder(
@@ -144,7 +143,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           "Driver",
                           style: TextStyle(color: Colors.white),
@@ -168,7 +167,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                         child: Center(
                           child: Text(
                             (index + 1).toString(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                             ),
                           ),
@@ -188,7 +187,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: selectedSeat == index
-                            ? Color(0xFF12D1DD)
+                            ? const Color(0xFF12D1DD)
                             : seats[index]
                                 ? Colors.white
                                 : Colors.black,
@@ -210,8 +209,8 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -247,7 +246,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                 }
               },
               style: TextButton.styleFrom(
-                  backgroundColor: Color(0xFF12D1DD),
+                  backgroundColor: const Color(0xFF12D1DD),
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0))),
@@ -279,10 +278,10 @@ class LegendItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(5),
           ),
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Text(
           text,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
       ],
     );

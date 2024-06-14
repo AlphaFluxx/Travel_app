@@ -82,7 +82,7 @@ class TicketScreen extends StatelessWidget {
                     'assets/image/qrcode.png',
                     height: 150,
                     width: 150,
-                  ), // replace with your QR code image path
+                  ), 
                   const SizedBox(height: 20),
                   const Text(
                     'Nama',
@@ -123,7 +123,6 @@ class TicketScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Handle download action
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.cyan,

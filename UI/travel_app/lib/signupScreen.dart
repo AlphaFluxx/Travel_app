@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:travel_app/loginscreen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:travel_app/dummydata.dart';
+import 'package:travel_app/auth.dart';
 
 class SignUpScreen extends StatelessWidget {
   @override
@@ -60,7 +60,7 @@ class SignUpScreen extends StatelessWidget {
                       children: [
                         const SizedBox(height: 20),
                         const Text(
-                          'Hello!',
+                          'Mari Kita Mulai!',
                           style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -78,6 +78,7 @@ class SignUpScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                         Row(
                           children: [
+                            const Text("Sudah mempunyai akun?"),
                             GestureDetector(
                               onTap: () {
                                 Navigator.push(
@@ -87,8 +88,11 @@ class SignUpScreen extends StatelessWidget {
                                 );
                               },
                               child: const Text(
-                                'Already have an account? Login',
-                                style: TextStyle(color: Colors.black),
+                                ' Login',
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
@@ -108,11 +112,22 @@ class SignUpScreen extends StatelessWidget {
                                 toastLength: Toast.LENGTH_SHORT,
                                 gravity: ToastGravity.BOTTOM,
                               );
-                            } else {
+                            } else if (register(usernameController.text, emailController.text, passwordController.text)) {
+                              Fluttertoast.showToast(
+                                msg: "Registrasi berhasil",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => LoginScreen()),
+                              );
+                            } else {
+                              Fluttertoast.showToast(
+                                msg: "Registrasi gagal",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
                               );
                             }
                           },
@@ -124,36 +139,6 @@ class SignUpScreen extends StatelessWidget {
                           child: const Text(
                             'Sign Up',
                             style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          'or',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildSocialButton(Colors.red),
-                            const SizedBox(width: 10),
-                            _buildSocialButton(Colors.yellow),
-                            const SizedBox(width: 10),
-                            _buildSocialButton(Colors.blue),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginScreen()),
-                            );
-                          },
-                          child: const Text(
-                            "Don't have an account? Register",
-                            style: TextStyle(color: Colors.black),
                           ),
                         ),
                       ],

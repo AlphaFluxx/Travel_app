@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'CustomBottomNavigationBar.dart'; // Impor CustomBottomNavigationBar
+import 'CustomBottomNavigationBar.dart'; // Import CustomBottomNavigationBar
+import 'LoginScreen.dart'; // Import LoginScreen
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -129,7 +130,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Colors.black,
           ),
           onTap: () {
-            // Tangani navigasi atau aksi
+            if (title == 'Logout') {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+              );
+            }
           },
         ),
         Divider(color: Colors.grey.shade300, thickness: 1),

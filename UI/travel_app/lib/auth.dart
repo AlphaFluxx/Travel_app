@@ -32,3 +32,14 @@ bool isValidUser(String username, String password) {
   }
   return false;
 }
+
+// fungsi untuk mendaftarkan pengguna baru
+bool register(String username, String email, String password) {
+  if (isEmailInUse(email) || isUsernameInUse(username)) {
+    return false; 
+  } else {
+    dummyUsers.add({'username': username, 'email': email, 'password': password});
+    return true; 
+  }
+}
+

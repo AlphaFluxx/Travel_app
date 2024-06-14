@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:travel_app/main.dart';
 import 'package:travel_app/signupscreen.dart'; // Import SignUpScreen
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:travel_app/dummydata.dart'; // Import dummy data
+import 'package:travel_app/auth.dart'; // Import dummy data
 
 class LoginScreen extends StatelessWidget {
   @override
@@ -61,7 +61,7 @@ class LoginScreen extends StatelessWidget {
                       children: [
                         const SizedBox(height: 20),
                         const Text(
-                          'Welcome Back!',
+                          'Selamat Datang!',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -77,14 +77,13 @@ class LoginScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            if (isValidUser(usernameController.text, //kode untuk verifikasi user
+                            if (isValidUser(usernameController.text, 
                                 passwordController.text)) {
                               Fluttertoast.showToast(
                                 msg: "Login Successful",
                                 toastLength: Toast.LENGTH_SHORT,
                                 gravity: ToastGravity.BOTTOM,
                               );
-                              // Navigate to Home or Main Screen
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -112,7 +111,7 @@ class LoginScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text("Don't have an account?"),
+                            const Text("Belum mempunyai akun?"),
                             const SizedBox(width: 5),
                             GestureDetector(
                               onTap: () {

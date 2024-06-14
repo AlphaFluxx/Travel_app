@@ -72,10 +72,10 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             onPressed: () {
               Navigator.pop(context);
             },
-            backgroundColor: const Color(0xFF1A1B1F), // Background color of FAB
-            foregroundColor: Colors.white, // Icon color of FAB
-            tooltip: 'Back', // Tooltip on FAB hold
-            shape: const CircleBorder(), // Circular shape
+            backgroundColor: const Color(0xFF1A1B1F), 
+            foregroundColor: Colors.white, 
+            tooltip: 'Back', 
+            shape: const CircleBorder(), 
             child: ColorFiltered(
               colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
               child: Image.asset('assets/icon/back.png'),
@@ -151,7 +151,7 @@ class PaymentMethodCard extends StatelessWidget {
               width: 200,
               height: 30,
               color: Colors.grey[300],
-              // You can add a placeholder for the payment method name
+              
             ),
           ),
           OutlinedButton(
