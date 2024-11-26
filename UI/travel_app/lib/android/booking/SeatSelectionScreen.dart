@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'jadwal.dart';
-import 'payment.dart';
+import '/android/booking/jadwal.dart';
+import '../payment/payment.dart';
 import 'package:fluttertoast/fluttertoast.dart'; 
 
 class SeatSelectionScreen extends StatefulWidget {

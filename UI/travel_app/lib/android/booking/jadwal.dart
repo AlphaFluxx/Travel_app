@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:travel_app/main.dart';
-import 'CustomBottomNavigationBar.dart';
-import 'SeatSelectionScreen.dart';
+import 'package:travel_app/android/main.dart';
+import '../widget/CustomBottomNavigationBar.dart';
+import '/android/booking/SeatSelectionScreen.dart';
 
 class Jadwal extends StatefulWidget {
   final String asal;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'ticket_screen.dart';
+import '../booking/ticket_screen.dart';
 
 class PaymentScreen extends StatelessWidget {
   final String asal;

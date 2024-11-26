@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'CustomBottomNavigationBar.dart'; // Import the CustomBottomNavigationBar
+import '/android/widget/CustomBottomNavigationBar.dart'; // Import the CustomBottomNavigationBar
 
 // Widget utama untuk halaman riwayat
 class HistoryScreen extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'loginscreen.dart'; // Make sure to create loginscreen.dart with your login screen implementation
+import 'auth/loginscreen.dart'; // Make sure to create loginscreen.dart with your login screen implementation
 
 class SplashScreen extends StatefulWidget {
   @override

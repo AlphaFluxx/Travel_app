@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:travel_app/historyScreen.dart';
-import 'main.dart'; // Impor MyApp.dart file
-import 'ProfileScreen.dart'; // Impor ProfileScreen.dart
+import 'package:travel_app/android/home/historyScreen.dart';
+import '../main.dart'; // Impor MyApp.dart file
+import '/android/profile/profileScreen.dart'; // Impor ProfileScreen.dart
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'CustomBottomNavigationBar.dart'; // Import CustomBottomNavigationBar
-import 'LoginScreen.dart'; // Import LoginScreen
+import '../widget/CustomBottomNavigationBar.dart'; // Import CustomBottomNavigationBar
+import '../auth/LoginScreen.dart'; // Import LoginScreen
 
 class ProfileScreen extends StatefulWidget {
   @override

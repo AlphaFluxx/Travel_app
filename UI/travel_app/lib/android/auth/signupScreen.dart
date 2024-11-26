@@ -1,13 +1,12 @@
-// loginscreen.dart
 import 'package:flutter/material.dart';
-import 'package:travel_app/main.dart';
-import 'package:travel_app/signupscreen.dart'; // Import SignUpScreen
+import 'package:travel_app/android/auth/loginscreen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:travel_app/auth.dart'; // Import dummy data
+import 'package:travel_app/android/auth/auth.dart';
 
-class LoginScreen extends StatelessWidget {
+class SignUpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final TextEditingController emailController = TextEditingController();
     final TextEditingController usernameController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
@@ -61,37 +60,72 @@ class LoginScreen extends StatelessWidget {
                       children: [
                         const SizedBox(height: 20),
                         const Text(
-                          'Selamat Datang!',
+                          'Mari Kita Mulai!',
                           style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black),
                         ),
                         const SizedBox(height: 20),
                         _buildTextField('Username', 'assets/icon/person.png',
                             controller: usernameController),
                         const SizedBox(height: 16),
+                        _buildTextField('Email', 'assets/icon/email.png',
+                            controller: emailController),
+                        const SizedBox(height: 16),
                         _buildTextField('Password', 'assets/icon/lock.png',
                             isPassword: true, controller: passwordController),
                         const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            const Text("Sudah mempunyai akun?"),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => LoginScreen()),
+                                );
+                              },
+                              child: const Text(
+                                ' Login',
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () {
-                            if (isValidUser(usernameController.text, 
-                                passwordController.text)) {
+                            if (isEmailInUse(emailController.text)) {
                               Fluttertoast.showToast(
-                                msg: "Login Successful",
+                                msg: "Email sudah digunakan",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                            } else if (isUsernameInUse(usernameController.text)) {
+                              Fluttertoast.showToast(
+                                msg: "Username sudah digunakan",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                              );
+                            } else if (register(usernameController.text, emailController.text, passwordController.text)) {
+                              Fluttertoast.showToast(
+                                msg: "Registrasi berhasil",
                                 toastLength: Toast.LENGTH_SHORT,
                                 gravity: ToastGravity.BOTTOM,
                               );
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => HomeScreen()),
+                                    builder: (context) => LoginScreen()),
                               );
                             } else {
                               Fluttertoast.showToast(
-                                msg: "Invalid Username or Password",
+                                msg: "Registrasi gagal",
                                 toastLength: Toast.LENGTH_SHORT,
                                 gravity: ToastGravity.BOTTOM,
                               );
@@ -103,33 +137,9 @@ class LoginScreen extends StatelessWidget {
                                 horizontal: 80, vertical: 15),
                           ),
                           child: const Text(
-                            'Login',
+                            'Sign Up',
                             style: TextStyle(color: Colors.white),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text("Belum mempunyai akun?"),
-                            const SizedBox(width: 5),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => SignUpScreen()),
-                                );
-                              },
-                              child: const Text(
-                                "Register",
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ],
                     ),
@@ -163,6 +173,17 @@ class LoginScreen extends StatelessWidget {
         hintStyle: const TextStyle(color: Colors.grey),
       ),
       style: const TextStyle(color: Colors.black),
+    );
+  }
+
+  Widget _buildSocialButton(Color color) {
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(10),
+      ),
     );
   }
 }

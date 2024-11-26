@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart'; // Tambahkan import untuk FlutterToast
-import 'package:travel_app/splashScreen.dart';
-import 'jadwal.dart';
-import 'CustomBottomNavigationBar.dart';
+import 'package:travel_app/android/splashScreen.dart';
+import 'booking/jadwal.dart';
+import '/android/widget/CustomBottomNavigationBar.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
