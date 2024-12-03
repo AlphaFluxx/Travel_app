@@ -283,7 +283,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       'tujuan': 'text',
                                       'Waktu berangkat': 'text',
                                       'Waktu kedatangan': 'text',
-                                      'harga': 'text'
+                                      'harga': 'number'
                                     },
                                     initialData: {
                                       'Id Kendaraan': JadwalhariantableState
@@ -302,16 +302,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           .selectedRowjadwal![
                                               'waktu_kedatangan']
                                           .toString(),
-                                      'Harga': JadwalhariantableState
+                                      'harga': JadwalhariantableState
                                           .selectedRowjadwal!['harga']
                                           .toString()
                                     },
                                   );
-                                  print(
-                                      'Initial data untuk kursi: ${KendaraanTableState.selectedRowKendaraan}');
                                 } else {
                                   _showAlert(context,
-                                      'Silakan pilih data Kendaraan terlebih dahulu.');
+                                      'Silakan pilih data Jadwal terlebih dahulu.');
                                 }
                               }
                             },
@@ -341,24 +339,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     width: double.infinity,
                     color: Colors.white,
                     padding: const EdgeInsets.all(16.0),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical, // Scroll secara vertikal
-                      child: SingleChildScrollView(
-                        scrollDirection:
-                            Axis.horizontal, // Scroll secara horizontal
-                        child: activeTable == 'pelanggan'
-                            ? PelangganTable()
-                            : activeTable == 'kursi'
-                                ? KursiTable()
-                                : activeTable == 'kendaraan'
-                                    ? KendaraanTable()
-                                    : activeTable == 'jadwalharian'
-                                        ? Jadwalhariantable()
-                                        : TransaksiTable(),
-                      ),
-                    ),
+                    child: activeTable == 'pelanggan'
+                        ? PelangganTable()
+                        : activeTable == 'kursi'
+                            ? KursiTable()
+                            : activeTable == 'kendaraan'
+                                ? KendaraanTable()
+                                : activeTable == 'jadwalharian'
+                                    ? Jadwalhariantable()
+                                    : TransaksiTable(),
                   ),
-                )
+                ),
               ],
             ),
           ),

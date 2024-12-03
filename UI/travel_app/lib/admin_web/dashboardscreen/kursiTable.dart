@@ -26,58 +26,75 @@ class KursiTableState extends State<KursiTable> {
 
   @override
   Widget build(BuildContext context) {
-    return StyledDataTable(
-      columns: const [
-        DataColumn(label: Text('ID')),
-        DataColumn(label: Text('Nomor Kursi')),
-        DataColumn(label: Text('ID Kendaraan')),
-        DataColumn(label: Text('StatusKetersediaan')),
-      ],
-      rows: kursiData.map((kursi) {
-        return DataRow(
-          selected: KursiTableState.selectedRowKursi?['id_kursi'] == kursi['id_kursi'],
-          color: WidgetStateProperty.resolveWith<Color?>((states) {
-            if (KursiTableState.selectedRowKursi?['id_kursi'] == kursi['id_kursi']) {
-              return Colors.blue.withOpacity(0.2);
-            }
-            return null;
-          }),
-          onSelectChanged: (isSelected) {
-            setState(() {
-              if (isSelected != null && isSelected) {
-                KursiTableState.selectedRowKursi = kursi;
-              } else {
-                KursiTableState.selectedRowKursi = null;
-              }
-            });
-          },
-          cells: [
-            DataCell(Text(kursi['id_kursi'].toString())),
-            DataCell(Text(kursi['nomor_kursi'].toString())),
-            DataCell(Text(kursi['id_kendaraan'].toString())),
-            DataCell(
-              DropdownButton<int>(
-                value: kursi['statusKetersediaan'],
-                onChanged: (int? newValue) {
-                  setState(() {
-                    kursi['statusKetersediaan'] = newValue;
-                  });
-                },
-                items: [
-                  const DropdownMenuItem(
-                    value: 1,
-                    child: Text('Available'),
-                  ),
-                  const DropdownMenuItem(
-                    value: 0,
-                    child: Text('Unavailable'),
-                  ),
-                ],
+    return Column(
+      children: [
+        Flexible(
+          child: Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: StyledDataTable(
+                  columns: const [
+                    DataColumn(label: Text('ID')),
+                    DataColumn(label: Text('Nomor Kursi')),
+                    DataColumn(label: Text('ID Kendaraan')),
+                    DataColumn(label: Text('Status Ketersediaan')),
+                  ],
+                  rows: kursiData.map((kursi) {
+                    return DataRow(
+                      selected: KursiTableState.selectedRowKursi?['id_kursi'] ==
+                          kursi['id_kursi'],
+                      color: WidgetStateProperty.resolveWith<Color?>((states) {
+                        if (KursiTableState.selectedRowKursi?['id_kursi'] ==
+                            kursi['id_kursi']) {
+                          return Colors.blue.withOpacity(0.2);
+                        }
+                        return null;
+                      }),
+                      onSelectChanged: (isSelected) {
+                        setState(() {
+                          if (isSelected != null && isSelected) {
+                            KursiTableState.selectedRowKursi = kursi;
+                          } else {
+                            KursiTableState.selectedRowKursi = null;
+                          }
+                        });
+                      },
+                      cells: [
+                        DataCell(Text(kursi['id_kursi'].toString())),
+                        DataCell(Text(kursi['nomor_kursi'].toString())),
+                        DataCell(Text(kursi['id_kendaraan'].toString())),
+                        DataCell(
+                          DropdownButton<int>(
+                            value: kursi['statusKetersediaan'],
+                            onChanged: (int? newValue) {
+                              setState(() {
+                                kursi['statusKetersediaan'] = newValue;
+                              });
+                            },
+                            items: [
+                              const DropdownMenuItem(
+                                value: 1,
+                                child: Text('Available'),
+                              ),
+                              const DropdownMenuItem(
+                                value: 0,
+                                child: Text('Unavailable'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
               ),
             ),
-          ],
-        );
-      }).toList(),
+          ),
+        ),
+      ],
     );
   }
 }

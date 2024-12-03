@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../dashboardScreen.dart';
+import '../dashboardscreen/dashboardScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,9 +10,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoginPage(),
+      home: LoginPage(),
     );
   }
 }
@@ -105,7 +105,7 @@ class LoginPage extends StatelessWidget {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => DashboardScreen()));
+                                  builder: (context) => const DashboardScreen()));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,

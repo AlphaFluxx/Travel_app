@@ -38,10 +38,11 @@ class TransaksiTableState extends State<TransaksiTable> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal, // Scroll horizontal untuk tabel
+    return Flexible(
+        child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
-        scrollDirection: Axis.vertical, // Scroll vertikal untuk baris tabel
+        scrollDirection: Axis.vertical,
         child: StyledDataTable(
           columns: const [
             DataColumn(label: Text('ID Transaksi')),
@@ -84,6 +85,6 @@ class TransaksiTableState extends State<TransaksiTable> {
           }).toList(),
         ),
       ),
-    );
+    ));
   }
 }
