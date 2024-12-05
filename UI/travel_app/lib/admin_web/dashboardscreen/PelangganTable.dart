@@ -6,87 +6,107 @@
 // File ini digunakan untuk menampilkan tabel data pelanggan dan logika seleksi baris.
 
 import 'package:flutter/material.dart';
+import '../utils/api/pelanggan.service.dart';
 import 'styledDataTable.dart';
 
 class PelangganTable extends StatefulWidget {
+  final Future<List<Map<String, dynamic>>> pelangganFuture;
+
+  // Constructor untuk menerima pelangganFuture dari luar
+  const PelangganTable({Key? key, required this.pelangganFuture})
+      : super(key: key);
+
   @override
   State<PelangganTable> createState() => PelangganTableState();
 }
 
 class PelangganTableState extends State<PelangganTable> {
   static Map<String, dynamic>? selectedRowPelanggan;
+  late Future<List<Map<String, dynamic>>> pelangganFuture;
+  final ScrollController _scrollController = ScrollController();
+  String _maskPassword(String password, [int limit = 6]) {
+  final maskedLength = password.length > limit ? limit : password.length;
+  return List.generate(maskedLength, (_) => '●').join();
+}
 
-  static final List<Map<String, dynamic>> pelangganData = [
-    {
-      'id_pelanggan': 1,
-      'Nama': 'John Doe',
-      'Email': 'john@example.com',
-      'Password': '******',
-    },
-    {
-      'id_pelanggan': 2,
-      'Nama': 'Jane Doe',
-      'Email': 'jane@example.com',
-      'Password': '******',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    pelangganFuture = PelangganService.getAllPelanggan();
+  }
+
+  void refreshTable() {
+    setState(() {
+      pelangganFuture = PelangganService.getAllPelanggan();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Flexible(
-          child: Scrollbar(
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: StyledDataTable(
-                  columns: const [
-                    DataColumn(label: Text('ID')),
-                    DataColumn(label: Text('Nama')),
-                    DataColumn(label: Text('Email')),
-                    DataColumn(label: Text('Password')),
-                  ],
-                  rows: pelangganData.map((pelanggan) {
-                    return DataRow(
-                      selected: PelangganTableState
-                              .selectedRowPelanggan?['id_pelanggan'] ==
-                          pelanggan['id_pelanggan'],
-                      color:
-                          WidgetStateProperty.resolveWith<Color?>((states) {
-                        if (PelangganTableState
-                                .selectedRowPelanggan?['id_pelanggan'] ==
-                            pelanggan['id_pelanggan']) {
-                          return Colors.blue.withOpacity(0.2);
-                        }
-                        return null;
-                      }),
-                      onSelectChanged: (isSelected) {
-                        setState(() {
-                          if (isSelected != null && isSelected) {
-                            PelangganTableState.selectedRowPelanggan =
-                                pelanggan;
-                          } else {
-                            PelangganTableState.selectedRowPelanggan = null;
-                          }
-                        });
-                      },
-                      cells: [
-                        DataCell(Text(pelanggan['id_pelanggan'].toString())),
-                        DataCell(Text(pelanggan['Nama'])),
-                        DataCell(Text(pelanggan['Email'])),
-                        DataCell(Text(pelanggan['Password'])),
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: widget.pelangganFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No data available'));
+        }
+
+        final pelangganData = snapshot.data!;
+
+        return Column(
+          children: [
+            Flexible(
+              child: Scrollbar(
+                controller: _scrollController,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: _scrollController,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    controller: _scrollController,
+                    child: StyledDataTable(
+                      columns: const [
+                        DataColumn(label: Text('ID')),
+                        DataColumn(label: Text('Nama')),
+                        DataColumn(label: Text('Email')),
+                        DataColumn(label: Text('Password')),
                       ],
-                    );
-                  }).toList(),
+                      rows: pelangganData.map((pelanggan) {
+                        return DataRow(
+                          selected: PelangganTableState
+                                  .selectedRowPelanggan?['id_pelanggan'] ==
+                              pelanggan['id_pelanggan'],
+                          onSelectChanged: (isSelected) {
+                            setState(() {
+                              if (isSelected != null && isSelected) {
+                                PelangganTableState.selectedRowPelanggan =
+                                    pelanggan;
+                              } else {
+                                PelangganTableState.selectedRowPelanggan = null;
+                              }
+                            });
+                          },
+                          cells: [
+                            DataCell(
+                                Text(pelanggan['id_pelanggan'].toString())),
+                            DataCell(Text(pelanggan['Nama'])),
+                            DataCell(Text(pelanggan['Email'])),
+                            DataCell(Text(_maskPassword(pelanggan['Password'])))
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

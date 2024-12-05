@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import '../utils/api/pelanggan.service.dart'; // Pastikan mengimport PelangganService
 
 class InputDialog extends StatefulWidget {
-  final String title; // Judul dialog (e.g., "Tambah Pelanggan")
-  final Map<String, dynamic> fields; // Fields yang akan diisi pengguna
-  final Map<String, dynamic>? initialData; // Data awal (untuk edit)
-  final Function(Map<String, dynamic>) onSubmit; // Callback saat submit
+  final String title;
+  final Map<String, dynamic> fields;
+  final Map<String, dynamic>? initialData;
+  final List<String> readOnlyFields; // Tambahkan ini
+
+  final Function(Map<String, dynamic>) onSubmit;
+  final VoidCallback refreshTable;
 
   const InputDialog({
     super.key,
     required this.title,
     required this.fields,
     this.initialData,
+    this.readOnlyFields = const [], 
     required this.onSubmit,
+    required this.refreshTable,
   });
 
   @override
@@ -20,31 +26,47 @@ class InputDialog extends StatefulWidget {
 
 class _InputDialogState extends State<InputDialog> {
   late Map<String, TextEditingController> controllers;
+  late Map<String, String?> errors; // Menyimpan pesan error untuk setiap field
 
   @override
   void initState() {
     super.initState();
-    // Inisialisasi TextEditingController untuk setiap field
     controllers = widget.fields.map((key, _) {
-      // Periksa jika initialData tidak null, ambil nilainya
-      String initialValue = widget.initialData != null && widget.initialData!.containsKey(key)
-          ? widget.initialData![key]?.toString() ?? '' // Ambil dari initialData jika ada
-          : ''; // Default kosong jika tidak ada di initialData
-
-      print('Field $key, initial data: $initialValue'); // Debugging nilai initial
-
-      return MapEntry(
-        key,
-        TextEditingController(text: initialValue),
-      );
+      String initialValue =
+          widget.initialData != null && widget.initialData!.containsKey(key)
+              ? widget.initialData![key]?.toString() ?? ''
+              : ''; // Default kosong jika tidak ada
+      return MapEntry(key, TextEditingController(text: initialValue));
     });
+
+    errors = widget.fields
+        .map((key, _) => MapEntry(key, null)); // Inisialisasi errors
   }
 
   @override
   void dispose() {
-    // Bersihkan semua controller untuk menghindari kebocoran memori
     controllers.values.forEach((controller) => controller.dispose());
     super.dispose();
+  }
+
+  bool validateFields() {
+    bool isValid = true;
+    final newErrors = <String, String?>{};
+
+    controllers.forEach((key, controller) {
+      if (controller.text.isEmpty) {
+        isValid = false;
+        newErrors[key] = "$key tidak boleh kosong"; // Pesan error
+      } else {
+        newErrors[key] = null;
+      }
+    });
+
+    setState(() {
+      errors = newErrors;
+    });
+
+    return isValid;
   }
 
   @override
@@ -58,44 +80,23 @@ class _InputDialogState extends State<InputDialog> {
             final fieldName = entry.key;
             final fieldType = entry.value;
 
-            // Menambahkan dropdown untuk StatusKetersediaan
-            if (fieldName == 'StatusKetersediaan') {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: DropdownButtonFormField<int>(
-                  value: widget.initialData?['StatusKetersediaan'] ?? 1, // Default "Available"
-                  onChanged: (int? newValue) {
-                    setState(() {
-                      controllers['StatusKetersediaan'] = TextEditingController(text: newValue.toString());
-                    });
-                  },
-                  items: const [
-                    DropdownMenuItem(
-                      value: 1,
-                      child: Text('Available'),
-                    ),
-                    DropdownMenuItem(
-                      value: 0,
-                      child: Text('Unavailable'),
-                    ),
-                  ],
-                  decoration: InputDecoration(
-                    labelText: 'Status Ketersediaan',
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-              );
-            }
-
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: TextField(
-                controller: controllers[fieldName],
-                keyboardType: fieldType == 'number' ? TextInputType.number : TextInputType.text,
-                decoration: InputDecoration(
-                  labelText: fieldName,
-                  border: const OutlineInputBorder(),
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: controllers[fieldName],
+                    keyboardType: fieldType == 'number'
+                        ? TextInputType.number
+                        : TextInputType.text,
+                    decoration: InputDecoration(
+                      labelText: fieldName,
+                      border: const OutlineInputBorder(),
+                      errorText: errors[fieldName], // Tampilkan pesan error
+                    ),
+                  ),
+                ],
               ),
             );
           }).toList(),
@@ -104,33 +105,37 @@ class _InputDialogState extends State<InputDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            Navigator.of(context).pop(); // Tutup dialog tanpa melakukan apa-apa
+            Navigator.of(context).pop(); // Tutup dialog tanpa menyimpan
           },
           child: const Text('Batal'),
         ),
         ElevatedButton(
-          onPressed: () {
-            final result = controllers.map((key, controller) {
-              final value = controller.text;
-              final fieldType = widget.fields[key];
+          onPressed: () async {
+            if (validateFields()) {
+              final result = controllers.map((key, controller) {
+                final value = controller.text;
+                return MapEntry(key, value);
+              });
 
-              // Debugging hasil konversi nilai
-              print('Field $key, value: $value, type: $fieldType');
-
-              // Menangani konversi tipe data berdasarkan fieldType
-              return MapEntry(
-                key,
-                fieldType == 'number' 
-                    ? (int.tryParse(value) ?? 0)  // Jika 'number', coba parse sebagai int
-                    : value,  // Jika bukan 'number', simpan sebagai string
-              );
-            });
-
-            widget.onSubmit(result); // Panggil callback dengan data yang diisi
-            Navigator.of(context).pop(); // Tutup dialog
+              try {
+                if (widget.initialData == null) {
+                  // Jika initialData tidak ada, lakukan operasi create
+                  await PelangganService.createPelanggan(result);
+                } else {
+                  // Jika initialData ada, lakukan operasi update
+                  final id =
+                      widget.initialData!['ID']; // Asumsikan ada field ID
+                  await PelangganService.updatePelanggan(id, result);
+                }
+                widget.refreshTable();
+                Navigator.of(context).pop(); // Tutup dialog
+              } catch (e) {
+                print("Gagal menyimpan data pelanggan: $e");
+              }
+            }
           },
           child: const Text('Simpan'),
-        ),
+        )
       ],
     );
   }

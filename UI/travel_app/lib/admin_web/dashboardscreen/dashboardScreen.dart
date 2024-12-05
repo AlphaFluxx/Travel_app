@@ -12,6 +12,7 @@ import 'pelangganTable.dart';
 import 'kursiTable.dart';
 import 'inputDialog.dart';
 import '../auth/loginAdminScreen.dart';
+import '../utils/api/pelanggan.service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -22,12 +23,27 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   String activeTable = 'pelanggan';
+  List<Map<String, dynamic>> pelangganData = [];
 
-  void _showInputDialog(
-    BuildContext context, {
+  late Future<List<Map<String, dynamic>>> pelangganFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    pelangganFuture = PelangganService.getAllPelanggan();
+  }
+
+  void refreshTable() {
+    setState(() {
+      pelangganFuture = PelangganService.getAllPelanggan();
+    });
+  }
+
+  _showInputDialog(
+    context, {
     required String title,
-    required Map<String, dynamic> initialData,
     required Map<String, String> fields,
+    required Map<String, dynamic> initialData,
   }) {
     showDialog(
       context: context,
@@ -36,10 +52,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
           title: title,
           fields: fields,
           initialData: initialData,
-          onSubmit: (updatedData) {
-            // Lakukan aksi setelah data disubmit
-            print('Data diperbarui: $updatedData');
+          onSubmit: (updatedData) async {
+            try {
+              // Logika saat data di-submit
+              if (activeTable == 'pelanggan') {
+                Map<String, dynamic> pelangganData = {
+                  'Nama': updatedData['Nama'],
+                  'Email': updatedData['Email'],
+                  'Password': updatedData['Password'],
+                };
+                await PelangganService.createPelanggan(pelangganData);
+                _showAlert(context, 'Pelanggan berhasil ditambahkan');
+                refreshTable();
+              }
+            } catch (e) {
+              _showAlert(context, 'Gagal menambahkan data: $e');
+            }
           },
+          refreshTable: refreshTable,
         );
       },
     );
@@ -57,14 +87,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             if (isLogout) ...[
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Tutup dialog
+                  Navigator.of(context).pop();
                 },
                 child: const Text('Tidak'),
               ),
               TextButton(
                 onPressed: () {
                   // Logika untuk logout
-                  Navigator.of(context).pop(); // Tutup dialog
+                  Navigator.of(context).pop();
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (context) =>
@@ -88,9 +118,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void _deleteData(String id) {
-    // Fungsi untuk menghapus data (placeholder)
-    print('Data dengan ID $id dihapus.');
+  void _deleteData(String id) async {
+    try {
+      int parsedId = int.parse(id);
+      await PelangganService.deletePelanggan(parsedId);
+      _showAlert(context, 'Data pelanggan berhasil dihapus.');
+      refreshTable();
+    } catch (e) {
+      _showAlert(context, 'Gagal menghapus data: $e');
+    }
   }
 
   @override
@@ -171,25 +207,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   initialData: {},
                                 );
                               } else if (activeTable == 'kendaraan') {
-                                _showInputDialog(context,
-                                    title: 'Tambah kendaraan',
-                                    initialData: {},
-                                    fields: {
-                                      'Jenis Kendaraan': 'text',
-                                      'Kapasitas': 'text'
-                                    });
+                                _showInputDialog(
+                                  context,
+                                  title: 'Tambah kendaraan',
+                                  initialData: {},
+                                  fields: {
+                                    'Jenis Kendaraan': 'text',
+                                    'Kapasitas': 'text'
+                                  },
+                                  // Menambahkan refreshTable
+                                );
                               } else if (activeTable == 'jadwalharian') {
-                                _showInputDialog(context,
-                                    title: 'Tambah jadwal',
-                                    initialData: {},
-                                    fields: {
-                                      'id_kendaraan': 'number',
-                                      'asal': 'text',
-                                      'tujuan': 'text',
-                                      'Waktu berangkat': 'text',
-                                      'Waktu kedatangan': 'text',
-                                      'harga': 'text'
-                                    });
+                                _showInputDialog(
+                                  context,
+                                  title: 'Tambah jadwal',
+                                  initialData: {},
+                                  fields: {
+                                    'id_kendaraan': 'number',
+                                    'asal': 'text',
+                                    'tujuan': 'text',
+                                    'Waktu berangkat': 'text',
+                                    'Waktu kedatangan': 'text',
+                                    'harga': 'text'
+                                  },
+                                );
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -203,17 +244,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               if (activeTable == 'pelanggan') {
                                 if (PelangganTableState.selectedRowPelanggan !=
                                     null) {
-                                  _showInputDialog(
-                                    context,
-                                    title: 'Edit Pelanggan',
-                                    fields: {
-                                      'Nama': 'text',
-                                      'Email': 'text',
-                                      'Password': 'text',
-                                    },
-                                    initialData: PelangganTableState
-                                        .selectedRowPelanggan!,
-                                  );
+                                  _showInputDialog(context,
+                                      title: 'Edit Pelanggan',
+                                      fields: {
+                                        "ID": 'int',
+                                        'Nama': 'text',
+                                        'Email': 'text',
+                                        'Password': 'text',
+                                      },
+                                      initialData: {
+                                        'ID': PelangganTableState
+                                                .selectedRowPelanggan![
+                                            'id_pelanggan'],
+                                        'Nama': PelangganTableState
+                                            .selectedRowPelanggan!['Nama']
+                                            .toString(),
+                                        'Email': PelangganTableState
+                                            .selectedRowPelanggan!['Email']
+                                            .toString(),
+                                      });
                                 } else {
                                   _showAlert(context,
                                       'Silakan pilih data pelanggan terlebih dahulu.');
@@ -240,8 +289,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               'statusKetersediaan']
                                     },
                                   );
-                                  print(
-                                      'Initial data untuk kursi: ${KursiTableState.selectedRowKursi}');
                                 } else {
                                   _showAlert(context,
                                       'Silakan pilih data kursi terlebih dahulu.');
@@ -265,8 +312,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           .selectedRowKendaraan!['kapasitas']
                                     },
                                   );
-                                  print(
-                                      'Initial data untuk kursi: ${KendaraanTableState.selectedRowKendaraan}');
                                 } else {
                                   _showAlert(context,
                                       'Silakan pilih data Kendaraan terlebih dahulu.');
@@ -321,8 +366,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           const SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: () {
-                              // Hapus data
-                              _deleteData('123');
+                              if (activeTable == 'pelanggan') {
+                                if (PelangganTableState.selectedRowPelanggan !=
+                                    null) {
+                                  String id = PelangganTableState
+                                      .selectedRowPelanggan!['id_pelanggan']
+                                      .toString();
+                                  _deleteData(
+                                      id); // Kirim sebagai String ke _deleteData
+                                } else {
+                                  _showAlert(context,
+                                      'Silakan pilih data pelanggan terlebih dahulu.');
+                                }
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
@@ -340,7 +396,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     color: Colors.white,
                     padding: const EdgeInsets.all(16.0),
                     child: activeTable == 'pelanggan'
-                        ? PelangganTable()
+                        ? PelangganTable(pelangganFuture: pelangganFuture)
                         : activeTable == 'kursi'
                             ? KursiTable()
                             : activeTable == 'kendaraan'
