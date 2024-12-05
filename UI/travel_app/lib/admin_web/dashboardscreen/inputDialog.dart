@@ -15,7 +15,7 @@ class InputDialog extends StatefulWidget {
     required this.title,
     required this.fields,
     this.initialData,
-    this.readOnlyFields = const [], 
+    this.readOnlyFields = const [],
     required this.onSubmit,
     required this.refreshTable,
   });
@@ -118,17 +118,14 @@ class _InputDialogState extends State<InputDialog> {
               });
 
               try {
-                if (widget.initialData == null) {
-                  // Jika initialData tidak ada, lakukan operasi create
+                if (widget.initialData!.isEmpty) {
                   await PelangganService.createPelanggan(result);
                 } else {
-                  // Jika initialData ada, lakukan operasi update
-                  final id =
-                      widget.initialData!['ID']; // Asumsikan ada field ID
+                  final id = widget.initialData!['ID'];
                   await PelangganService.updatePelanggan(id, result);
                 }
                 widget.refreshTable();
-                Navigator.of(context).pop(); // Tutup dialog
+                Navigator.of(context).pop();
               } catch (e) {
                 print("Gagal menyimpan data pelanggan: $e");
               }

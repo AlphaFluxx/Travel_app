@@ -6,7 +6,6 @@
 // File ini digunakan untuk menampilkan tabel data pelanggan dan logika seleksi baris.
 
 import 'package:flutter/material.dart';
-import '../utils/api/pelanggan.service.dart';
 import 'styledDataTable.dart';
 
 class PelangganTable extends StatefulWidget {
@@ -29,17 +28,7 @@ class PelangganTableState extends State<PelangganTable> {
   return List.generate(maskedLength, (_) => '●').join();
 }
 
-  @override
-  void initState() {
-    super.initState();
-    pelangganFuture = PelangganService.getAllPelanggan();
-  }
 
-  void refreshTable() {
-    setState(() {
-      pelangganFuture = PelangganService.getAllPelanggan();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

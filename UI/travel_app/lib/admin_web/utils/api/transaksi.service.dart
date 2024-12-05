@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Example for secure storage
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; 
 
-class PelangganService {
-  static const String baseUrl = 'http://localhost:3306/admin/pelanggan/';
+class TransaksiService {
+  static const String baseUrl = 'http://localhost:3306/admin/transaksi';
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Function to get the token from storage
@@ -11,8 +11,8 @@ class PelangganService {
     return await _storage.read(key: 'token'); // Replace 'token' with your key
   }
 
-  // Mendapatkan semua data pelanggan
-  static Future<List<Map<String, dynamic>>> getAllPelanggan() async {
+  // Mendapatkan semua data Transaksi
+  static Future<List<Map<String, dynamic>>> getAllTransaksi() async {
     final token = await getToken();
     final response = await http.get(
       Uri.parse(baseUrl),
@@ -26,17 +26,16 @@ class PelangganService {
     if (response.statusCode == 200) {
       return List<Map<String, dynamic>>.from(jsonDecode(response.body)['data']);
     } else {
-      print('Failed to load pelanggan data: ${response.body}');
-      throw Exception('Failed to load pelanggan data');
+      print('Failed to load Transaksi data: ${response.body}');
+      throw Exception('Failed to load Transaksi data');
     }
   }
 
-  // Menambahkan pelanggan baru
-  static Future<void> createPelanggan(Map<String, dynamic> pelanggan) async {
+  // Menambahkan Transaksi baru
+  static Future<void> createTransaksi(Map<String, dynamic> transaksi) async {
     final token = await getToken();
 
-    // Hapus field yang tidak diperlukan
-    pelanggan.removeWhere((key, value) => value == null || key == 'id');
+
 
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -44,20 +43,20 @@ class PelangganService {
         'Content-Type': 'application/json',
         if (token != null) 'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(pelanggan),
+      body: jsonEncode(transaksi),
     );
 
     if (response.statusCode == 201) {
-      print("Pelanggan berhasil ditambahkan.");
+      print("Transaksi berhasil ditambahkan.");
     } else {
-      print('Failed to create pelanggan: ${response.body}');
-      throw Exception('Failed to create pelanggan');
+      print('Failed to create Transaksi: ${response.body}');
+      throw Exception('Failed to create Transaksi');
     }
   }
 
-  // Memperbarui pelanggan
-  static Future<void> updatePelanggan(
-      int id, Map<String, dynamic> pelanggan) async {
+  // Memperbarui Transaksi
+  static Future<void> updateTransaksi(
+      int id, Map<String, dynamic> transaksi) async {
     final token = await getToken();
     final response = await http.put(
       Uri.parse('$baseUrl/$id'),
@@ -65,7 +64,7 @@ class PelangganService {
         'Content-Type': 'application/json',
         if (token != null) 'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(pelanggan),
+      body: jsonEncode(transaksi),
     );
 
     if (response.statusCode != 200) {
@@ -73,8 +72,8 @@ class PelangganService {
     }
   }
 
-  // Menghapus pelanggan
-  static Future<void> deletePelanggan(int id) async {
+  // Menghapus Transaksi
+  static Future<void> deleteTransaksi(int id) async {
     final token = await getToken();
     final response = await http.delete(
       Uri.parse('$baseUrl/$id'),
@@ -85,7 +84,7 @@ class PelangganService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to delete pelanggan');
+      throw Exception('Failed to delete Transaksi');
     }
   }
 }

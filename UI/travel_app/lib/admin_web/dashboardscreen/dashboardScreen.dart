@@ -1,8 +1,3 @@
-// File ini merupakan layar utama Dashboard untuk aplikasi admin.
-// Berfungsi sebagai tempat pengelolaan tampilan utama dashboard,
-// termasuk menu samping, tabel data, dan tombol aksi (Create, Update, Delete).
-
-// dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:travel_app/admin_web/dashboardscreen/jadwalHarianTable.dart';
 import 'package:travel_app/admin_web/dashboardscreen/kendaraanTable.dart';
@@ -13,6 +8,10 @@ import 'kursiTable.dart';
 import 'inputDialog.dart';
 import '../auth/loginAdminScreen.dart';
 import '../utils/api/pelanggan.service.dart';
+import '../utils/api/kursi.service.dart';
+import '../utils/api/kendaraan.service.dart';
+import '../utils/api/transaksi.service.dart';
+import '../utils/api/jadwalHarian.service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -26,16 +25,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Map<String, dynamic>> pelangganData = [];
 
   late Future<List<Map<String, dynamic>>> pelangganFuture;
+  late Future<List<Map<String, dynamic>>> kursiFuture;
+  late Future<List<Map<String, dynamic>>> kendaraanFuture;
+  late Future<List<Map<String, dynamic>>> transaksiFuture;
+  late Future<List<Map<String, dynamic>>> jadwalHarianFuture;
 
   @override
   void initState() {
     super.initState();
     pelangganFuture = PelangganService.getAllPelanggan();
+    kursiFuture = KursinService.getAllKursi();
+    kendaraanFuture = KendaraannService.getAllKendaraan();
+    transaksiFuture = TransaksiService.getAllTransaksi();
+    jadwalHarianFuture = JadwalharianService.getAllJadwalHarian();
   }
 
   void refreshTable() {
     setState(() {
       pelangganFuture = PelangganService.getAllPelanggan();
+      kursiFuture = KursinService.getAllKursi();
+      kendaraanFuture = KendaraannService.getAllKendaraan();
+      transaksiFuture = TransaksiService.getAllTransaksi();
+      jadwalHarianFuture = JadwalharianService.getAllJadwalHarian();
     });
   }
 
@@ -52,23 +63,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           title: title,
           fields: fields,
           initialData: initialData,
-          onSubmit: (updatedData) async {
-            try {
-              // Logika saat data di-submit
-              if (activeTable == 'pelanggan') {
-                Map<String, dynamic> pelangganData = {
-                  'Nama': updatedData['Nama'],
-                  'Email': updatedData['Email'],
-                  'Password': updatedData['Password'],
-                };
-                await PelangganService.createPelanggan(pelangganData);
-                _showAlert(context, 'Pelanggan berhasil ditambahkan');
-                refreshTable();
-              }
-            } catch (e) {
-              _showAlert(context, 'Gagal menambahkan data: $e');
-            }
-          },
+          onSubmit: (updatedData) async {},
           refreshTable: refreshTable,
         );
       },
@@ -132,30 +127,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
         backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: Image.asset(
-            'assets/icon/back.png', // Path gambar Anda
-            width: 24,
-            height: 24,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          leading: IconButton(
+            icon: Image.asset(
+              'assets/icon/back.png', // Path gambar Anda
+              width: 24,
+              height: 24,
+            ),
+            onPressed: () {
+              _showAlert(
+                context,
+                'Apakah Anda yakin ingin logout?',
+                isLogout: true, // Tampilkan opsi logout
+              );
+            },
           ),
-          onPressed: () {
-            _showAlert(
-              context,
-              'Apakah Anda yakin ingin logout?',
-              isLogout: true, // Tampilkan opsi logout
-            );
-          },
+          title: const Text(
+            'Admin Dashboard',
+            style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+          ),
         ),
-        title: const Text(
-          'Admin Dashboard',
-          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: Row(
-        children: [
+        body: Row(children: [
           SideMenu(
             onTableSelected: (table) {
               setState(() {
@@ -398,19 +392,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: activeTable == 'pelanggan'
                         ? PelangganTable(pelangganFuture: pelangganFuture)
                         : activeTable == 'kursi'
-                            ? KursiTable()
+                            ? KursiTable(kursiFuture: kursiFuture)
                             : activeTable == 'kendaraan'
-                                ? KendaraanTable()
+                                ? KendaraanTable(
+                                    kendaraanFuture: kendaraanFuture)
                                 : activeTable == 'jadwalharian'
-                                    ? Jadwalhariantable()
-                                    : TransaksiTable(),
+                                    ? Jadwalhariantable(
+                                        jadwalFuture: jadwalHarianFuture)
+                                    : TransaksiTable(
+                                        transaksiFuture: transaksiFuture),
                   ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          )
+        ]));
   }
 }
