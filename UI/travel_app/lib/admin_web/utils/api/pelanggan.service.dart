@@ -38,6 +38,9 @@ class PelangganService {
     // Hapus field yang tidak diperlukan
     pelanggan.removeWhere((key, value) => value == null || key == 'id');
 
+    print(
+        "Sending create request for pelanggan: $pelanggan"); // Log data yang dikirim
+
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: {
@@ -46,6 +49,9 @@ class PelangganService {
       },
       body: jsonEncode(pelanggan),
     );
+
+    print("Response status: ${response.statusCode}"); // Log status kode respons
+    print("Response body: ${response.body}"); // Log isi respons dari server
 
     if (response.statusCode == 201) {
       print("Pelanggan berhasil ditambahkan.");
@@ -59,6 +65,10 @@ class PelangganService {
   static Future<void> updatePelanggan(
       int id, Map<String, dynamic> pelanggan) async {
     final token = await getToken();
+
+    print(
+        "Sending update request for pelanggan with ID $id: $pelanggan"); // Log data yang dikirim
+
     final response = await http.put(
       Uri.parse('$baseUrl/$id'),
       headers: {
@@ -68,8 +78,14 @@ class PelangganService {
       body: jsonEncode(pelanggan),
     );
 
+    print("Response status: ${response.statusCode}"); // Log status kode respons
+    print("Response body: ${response.body}"); // Log isi respons dari server
+
     if (response.statusCode != 200) {
+      print('Failed to update pelanggan: ${response.body}');
       throw Exception('Failed to update pelanggan');
+    } else {
+      print("Pelanggan updated successfully.");
     }
   }
 

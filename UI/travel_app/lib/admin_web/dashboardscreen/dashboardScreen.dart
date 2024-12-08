@@ -22,7 +22,6 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   String activeTable = 'pelanggan';
-  List<Map<String, dynamic>> pelangganData = [];
 
   late Future<List<Map<String, dynamic>>> pelangganFuture;
   late Future<List<Map<String, dynamic>>> kursiFuture;
@@ -33,14 +32,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    pelangganFuture = PelangganService.getAllPelanggan();
-    kursiFuture = KursinService.getAllKursi();
-    kendaraanFuture = KendaraannService.getAllKendaraan();
-    transaksiFuture = TransaksiService.getAllTransaksi();
-    jadwalHarianFuture = JadwalharianService.getAllJadwalHarian();
+    refreshTable();
   }
 
   void refreshTable() {
+    print("Refreshing table data for activeTable: $activeTable");
     setState(() {
       pelangganFuture = PelangganService.getAllPelanggan();
       kursiFuture = KursinService.getAllKursi();
@@ -50,24 +46,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  _showInputDialog(
-    context, {
+  Future<void> _showInputDialog({
     required String title,
     required Map<String, String> fields,
-    required Map<String, dynamic> initialData,
-  }) {
-    showDialog(
+    Map<String, dynamic>? initialData,
+    required String activeTable,
+    Map<String, dynamic>? indikator,
+  }) async {
+    print("Opening input dialog for table: $activeTable");
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) {
-        return InputDialog(
-          title: title,
-          fields: fields,
-          initialData: initialData,
-          onSubmit: (updatedData) async {},
-          refreshTable: refreshTable,
-        );
-      },
+      builder: (context) => InputDialog(
+        fields: fields,
+        initialData: initialData,
+        activeTable: activeTable,
+        indikator: indikator,
+      ),
     );
+
+    if (result != null) {
+      print("Data saved/updated, refreshing table...");
+      refreshTable();
+    } else {
+      print("No data returned from input dialog.");
+    }
   }
 
   void _showAlert(BuildContext context, String message,
@@ -88,13 +90,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  // Logika untuk logout
                   Navigator.of(context).pop();
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          LoginPage(), // Navigasi ke halaman login
-                    ),
+                    MaterialPageRoute(builder: (context) => LoginPage()),
                   );
                 },
                 child: const Text('Ya'),
@@ -102,7 +100,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ] else ...[
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Tutup dialog
+                  Navigator.of(context).pop();
                 },
                 child: const Text('OK'),
               ),
@@ -127,60 +125,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          leading: IconButton(
-            icon: Image.asset(
-              'assets/icon/back.png', // Path gambar Anda
-              width: 24,
-              height: 24,
-            ),
-            onPressed: () {
-              _showAlert(
-                context,
-                'Apakah Anda yakin ingin logout?',
-                isLogout: true, // Tampilkan opsi logout
-              );
-            },
+        leading: IconButton(
+          icon: Image.asset(
+            'assets/icon/back.png', // Path gambar Anda
+            width: 24,
+            height: 24,
           ),
-          title: const Text(
-            'Admin Dashboard',
-            style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-          ),
+          onPressed: () {
+            print("Logout requested.");
+            _showAlert(
+              context,
+              'Apakah Anda yakin ingin logout?',
+              isLogout: true, // Tampilkan opsi logout
+            );
+          },
         ),
-        body: Row(children: [
-          SideMenu(
-            onTableSelected: (table) {
-              setState(() {
-                activeTable = table;
-              });
-            },
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Table: $activeTable',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+        title: const Text(
+          'Admin Dashboard',
+          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: Row(children: [
+        SideMenu(
+          onTableSelected: (table) {
+            print("Table selected: $table");
+            setState(() {
+              activeTable = table;
+            });
+          },
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Table: $activeTable',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              // Tambah data
-                              if (activeTable == 'pelanggan') {
-                                _showInputDialog(
-                                  context,
+                    ),
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            print("Creating new data for table: $activeTable");
+                            if (activeTable == 'pelanggan') {
+                              _showInputDialog(
                                   title: 'Tambah Pelanggan',
                                   fields: {
                                     'Nama': 'text',
@@ -188,10 +187,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     'Password': 'text',
                                   },
                                   initialData: {},
-                                );
-                              } else if (activeTable == 'kursi') {
-                                _showInputDialog(
-                                  context,
+                                  activeTable: activeTable,
+                                  indikator: {});
+                            } else if (activeTable == 'kursi') {
+                              _showInputDialog(
                                   title: 'Tambah Kursi',
                                   fields: {
                                     'Nomor Kursi': 'number',
@@ -199,213 +198,286 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     'StatusKetersediaan': 'number',
                                   },
                                   initialData: {},
-                                );
-                              } else if (activeTable == 'kendaraan') {
-                                _showInputDialog(
-                                  context,
+                                  activeTable: activeTable,
+                                  indikator: {});
+                            } else if (activeTable == 'kendaraan') {
+                              _showInputDialog(
                                   title: 'Tambah kendaraan',
                                   initialData: {},
                                   fields: {
-                                    'Jenis Kendaraan': 'text',
-                                    'Kapasitas': 'text'
+                                    'jenis_kendaraan': 'text',
+                                    'kapasitas': 'number'
                                   },
-                                  // Menambahkan refreshTable
-                                );
-                              } else if (activeTable == 'jadwalharian') {
-                                _showInputDialog(
-                                  context,
+                                  activeTable: activeTable,
+                                  indikator: {});
+                            } else if (activeTable == 'jadwalharian') {
+                              _showInputDialog(
                                   title: 'Tambah jadwal',
                                   initialData: {},
                                   fields: {
                                     'id_kendaraan': 'number',
                                     'asal': 'text',
                                     'tujuan': 'text',
-                                    'Waktu berangkat': 'text',
-                                    'Waktu kedatangan': 'text',
-                                    'harga': 'text'
+                                    'Waktu_berangkat': 'text',
+                                    'Waktu_kedatangan': 'text',
+                                    'harga': 'number'
+                                  },
+                                  activeTable: activeTable,
+                                  indikator: {});
+                            } else if (activeTable == 'transaksi') {
+                              _showInputDialog(
+                                  title: 'Tambah transaksi',
+                                  initialData: {},
+                                  fields: {
+                                    'id_pelanggan': 'number',
+                                    'id_jadwal': 'number',
+                                    'id_kursi': 'number',
+                                    'tanggal': 'number',
+                                    'status_transaksi': 'text'
+                                  },
+                                  activeTable: activeTable,
+                                  indikator: {});
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                          ),
+                          child: const Text('Create'),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            print("Update requested for table: $activeTable");
+                            if (activeTable == 'pelanggan') {
+                              if (PelangganTableState.selectedRowPelanggan !=
+                                  null) {
+                                _showInputDialog(
+                                    title: 'Edit Pelanggan',
+                                    fields: {
+                                      "ID": 'int',
+                                      'Nama': 'text',
+                                      'Email': 'text',
+                                      'Password': 'text',
+                                    },
+                                    initialData: {
+                                      'ID': PelangganTableState
+                                              .selectedRowPelanggan![
+                                          'id_pelanggan'],
+                                      'Nama': PelangganTableState
+                                          .selectedRowPelanggan!['Nama']
+                                          .toString(),
+                                      'Email': PelangganTableState
+                                          .selectedRowPelanggan!['Email']
+                                          .toString(),
+                                    },
+                                    indikator: {
+                                      'ID': PelangganTableState
+                                              .selectedRowPelanggan![
+                                          'id_pelanggan'],
+                                    },
+                                    activeTable: activeTable);
+                              } else {
+                                _showAlert(context,
+                                    'Silakan pilih data pelanggan terlebih dahulu.');
+                              }
+                            } else if (activeTable == 'kursi') {
+                              if (KursiTableState.selectedRowKursi != null) {
+                                _showInputDialog(
+                                  title: 'Edit Kursi',
+                                  fields: {
+                                    'Nomor Kursi': 'text',
+                                    'ID Kursi': 'text',
+                                    'StatusKetersediaan': 'number',
+                                  },
+                                  initialData: {
+                                    'Nomor Kursi': KursiTableState
+                                        .selectedRowKursi!['nomor_kursi'],
+                                    'ID Kursi': KursiTableState
+                                        .selectedRowKursi!['id_kursi'],
+                                    'StatusKetersediaan': KursiTableState
+                                        .selectedRowKursi!['statusKetersediaan']
+                                  },
+                                  activeTable: activeTable,
+                                  indikator: {
+                                    'id_kursi': KursiTableState
+                                        .selectedRowKursi!['id_kursi']
+                                        .toString(),
                                   },
                                 );
+                              } else {
+                                _showAlert(context,
+                                    'Silakan pilih data kursi terlebih dahulu.');
                               }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                            ),
-                            child: const Text('Create'),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (activeTable == 'pelanggan') {
-                                if (PelangganTableState.selectedRowPelanggan !=
-                                    null) {
-                                  _showInputDialog(context,
-                                      title: 'Edit Pelanggan',
-                                      fields: {
-                                        "ID": 'int',
-                                        'Nama': 'text',
-                                        'Email': 'text',
-                                        'Password': 'text',
-                                      },
-                                      initialData: {
-                                        'ID': PelangganTableState
-                                                .selectedRowPelanggan![
-                                            'id_pelanggan'],
-                                        'Nama': PelangganTableState
-                                            .selectedRowPelanggan!['Nama']
-                                            .toString(),
-                                        'Email': PelangganTableState
-                                            .selectedRowPelanggan!['Email']
-                                            .toString(),
-                                      });
-                                } else {
-                                  _showAlert(context,
-                                      'Silakan pilih data pelanggan terlebih dahulu.');
-                                }
-                              } else if (activeTable == 'kursi') {
-                                if (KursiTableState.selectedRowKursi != null) {
-                                  _showInputDialog(
-                                    context,
-                                    title: 'Edit Kursi',
-                                    fields: {
-                                      'Nomor Kursi': 'text',
-                                      'ID Kendaraan': 'text',
-                                      'StatusKetersediaan': 'number',
-                                    },
-                                    initialData: {
-                                      'Nomor Kursi': KursiTableState
-                                          .selectedRowKursi!['nomor_kursi']
-                                          .toString(),
-                                      'ID Kendaraan': KursiTableState
-                                          .selectedRowKursi!['id_kendaraan']
-                                          .toString(),
-                                      'StatusKetersediaan':
-                                          KursiTableState.selectedRowKursi![
-                                              'statusKetersediaan']
-                                    },
-                                  );
-                                } else {
-                                  _showAlert(context,
-                                      'Silakan pilih data kursi terlebih dahulu.');
-                                }
-                              } else if (activeTable == 'kendaraan') {
-                                if (KendaraanTableState.selectedRowKendaraan !=
-                                    null) {
-                                  _showInputDialog(
-                                    context,
-                                    title: 'Edit kendaraan',
-                                    fields: {
-                                      'Jenis Kendaraan': 'text',
-                                      'Kapasitas': 'number',
-                                    },
-                                    initialData: {
-                                      'Jenis Kendaraan': KendaraanTableState
-                                          .selectedRowKendaraan![
-                                              'jenis_kendaraan']
-                                          .toString(),
-                                      'Kapasitas': KendaraanTableState
-                                          .selectedRowKendaraan!['kapasitas']
-                                    },
-                                  );
-                                } else {
-                                  _showAlert(context,
-                                      'Silakan pilih data Kendaraan terlebih dahulu.');
-                                }
-                              } else if (activeTable == 'jadwalharian') {
-                                if (JadwalhariantableState.selectedRowjadwal !=
-                                    null) {
-                                  _showInputDialog(
-                                    context,
-                                    title: 'Edit jadwal',
-                                    fields: {
-                                      'id_kendaraan': 'number',
-                                      'asal': 'text',
-                                      'tujuan': 'text',
-                                      'Waktu berangkat': 'text',
-                                      'Waktu kedatangan': 'text',
-                                      'harga': 'number'
-                                    },
-                                    initialData: {
-                                      'Id Kendaraan': JadwalhariantableState
-                                          .selectedRowjadwal!['id_kendaraan']
-                                          .toString(),
-                                      'asal': JadwalhariantableState
-                                          .selectedRowjadwal!['asal']
-                                          .toString(),
-                                      'tujuan': JadwalhariantableState
-                                          .selectedRowjadwal!['tujuan']
-                                          .toString(),
-                                      'Waktu berangkat': JadwalhariantableState
-                                          .selectedRowjadwal!['waktu_berangkat']
-                                          .toString(),
-                                      'Waktu kedatangan': JadwalhariantableState
-                                          .selectedRowjadwal![
-                                              'waktu_kedatangan']
-                                          .toString(),
-                                      'harga': JadwalhariantableState
-                                          .selectedRowjadwal!['harga']
-                                          .toString()
-                                    },
-                                  );
-                                } else {
-                                  _showAlert(context,
-                                      'Silakan pilih data Jadwal terlebih dahulu.');
-                                }
+                            } else if (activeTable == 'kendaraan') {
+                              if (KendaraanTableState.selectedRowKendaraan !=
+                                  null) {
+                                _showInputDialog(
+                                  title: 'Edit kendaraan',
+                                  fields: {
+                                    'ID Kendaraan': 'text',
+                                    'jenis_kendaraan': 'text',
+                                    'kapasitas': 'number',
+                                  },
+                                  initialData: {
+                                    'ID Kendaraan': KendaraanTableState
+                                        .selectedRowKendaraan!["id_kendaraan"],
+                                    'jenis_kendaraan': KendaraanTableState
+                                        .selectedRowKendaraan![
+                                            'jenis_kendaraan']
+                                        .toString(),
+                                    'kapasitas': KendaraanTableState
+                                        .selectedRowKendaraan!['kapasitas']
+                                  },
+                                  activeTable: activeTable,
+                                  indikator: {
+                                    'id_kendaraan': KendaraanTableState
+                                        .selectedRowKendaraan!["id_kendaraan"],
+                                  },
+                                );
+                              } else {
+                                _showAlert(context,
+                                    'Silakan pilih data Kendaraan terlebih dahulu.');
                               }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                            ),
-                            child: const Text('Update'),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (activeTable == 'pelanggan') {
-                                if (PelangganTableState.selectedRowPelanggan !=
-                                    null) {
-                                  String id = PelangganTableState
-                                      .selectedRowPelanggan!['id_pelanggan']
-                                      .toString();
-                                  _deleteData(
-                                      id); // Kirim sebagai String ke _deleteData
-                                } else {
-                                  _showAlert(context,
-                                      'Silakan pilih data pelanggan terlebih dahulu.');
-                                }
+                            } else if (activeTable == 'jadwalharian') {
+                              if (JadwalhariantableState.selectedRowjadwal !=
+                                  null) {
+                                _showInputDialog(
+                                  title: 'Edit jadwal',
+                                  fields: {
+                                    'id_kendaraan': 'number',
+                                    'asal': 'text',
+                                    'tujuan': 'text',
+                                    'Waktu_berangkat': 'text',
+                                    'Waktu_kedatangan': 'text',
+                                    'harga': 'number'
+                                  },
+                                  initialData: {
+                                    'id_jadwalharian': JadwalhariantableState
+                                        .selectedRowjadwal!['id_jadwal'],
+                                    'id_kendaraan': JadwalhariantableState
+                                        .selectedRowjadwal!['id_kendaraan'],
+                                    'asal': JadwalhariantableState
+                                        .selectedRowjadwal!['asal']
+                                        .toString(),
+                                    'tujuan': JadwalhariantableState
+                                        .selectedRowjadwal!['tujuan']
+                                        .toString(),
+                                    'Waktu berangkat': JadwalhariantableState
+                                        .selectedRowjadwal!['waktu_berangkat']
+                                        .toString(),
+                                    'Waktu kedatangan': JadwalhariantableState
+                                        .selectedRowjadwal!['waktu_kedatangan']
+                                        .toString(),
+                                    'harga': JadwalhariantableState
+                                        .selectedRowjadwal!['harga']
+                                  },
+                                  activeTable: activeTable,
+                                  indikator: {
+                                    'id_jadwal': JadwalhariantableState
+                                        .selectedRowjadwal!['id_jadwal']
+                                  },
+                                );
+                              } else {
+                                _showAlert(context,
+                                    'Silakan pilih data Jadwal terlebih dahulu.');
                               }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                            ),
-                            child: const Text('Delete'),
+                            } else if (activeTable == 'transaksi') {
+                              if (TransaksiTableState.selectedRowTransaksi !=
+                                  null) {
+                                _showInputDialog(
+                                  title: 'Edit transaksi',
+                                  fields: {
+                                    'id_transaksi': 'number',
+                                    'id_pelanggan': 'number',
+                                    'id_jadwal': 'number',
+                                    'id_kursi': 'number',
+                                    'tanggal': 'text',
+                                    'status_transaksi': 'text'
+                                  },
+                                  initialData: {
+                                    'id_transaksi': TransaksiTableState
+                                        .selectedRowTransaksi!['id_transaksi'],
+                                    'id_pelanggan': TransaksiTableState
+                                        .selectedRowTransaksi!['id_pelanggan'],
+                                    'id_jadwal': TransaksiTableState
+                                        .selectedRowTransaksi!['id_jadwal'],
+                                    'id_kursi': TransaksiTableState
+                                        .selectedRowTransaksi!['id_kursi'],
+                                    'tanggal': TransaksiTableState
+                                        .selectedRowTransaksi!['tanggal']
+                                        .toString(),
+                                    'status_transaksi': TransaksiTableState
+                                        .selectedRowTransaksi![
+                                            'status_transaksi']
+                                        .toString(),
+                                  },
+                                  activeTable: activeTable,
+                                  indikator: {
+                                    'id_transaksi': TransaksiTableState
+                                        .selectedRowTransaksi!['id_transaksi'],
+                                  },
+                                );
+                              } else {
+                                _showAlert(context,
+                                    'Silakan pilih data Jadwal terlebih dahulu.');
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                          child: const Text('Update'),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            print("Delete requested for table: $activeTable");
+                            if (activeTable == 'pelanggan') {
+                              if (PelangganTableState.selectedRowPelanggan !=
+                                  null) {
+                                String id = PelangganTableState
+                                    .selectedRowPelanggan!['id_pelanggan']
+                                    .toString();
+                                _deleteData(
+                                    id); // Kirim sebagai String ke _deleteData
+                              } else {
+                                _showAlert(context,
+                                    'Silakan pilih data pelanggan terlebih dahulu.');
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                          ),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    color: Colors.white,
-                    padding: const EdgeInsets.all(16.0),
-                    child: activeTable == 'pelanggan'
-                        ? PelangganTable(pelangganFuture: pelangganFuture)
-                        : activeTable == 'kursi'
-                            ? KursiTable(kursiFuture: kursiFuture)
-                            : activeTable == 'kendaraan'
-                                ? KendaraanTable(
-                                    kendaraanFuture: kendaraanFuture)
-                                : activeTable == 'jadwalharian'
-                                    ? Jadwalhariantable(
-                                        jadwalFuture: jadwalHarianFuture)
-                                    : TransaksiTable(
-                                        transaksiFuture: transaksiFuture),
-                  ),
+              ),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(16.0),
+                  child: activeTable == 'pelanggan'
+                      ? PelangganTable(pelangganFuture: pelangganFuture)
+                      : activeTable == 'kursi'
+                          ? KursiTable(kursiFuture: kursiFuture)
+                          : activeTable == 'kendaraan'
+                              ? KendaraanTable(kendaraanFuture: kendaraanFuture)
+                              : activeTable == 'jadwalharian'
+                                  ? Jadwalhariantable(
+                                      jadwalFuture: jadwalHarianFuture)
+                                  : TransaksiTable(
+                                      transaksiFuture: transaksiFuture),
                 ),
-              ],
-            ),
-          )
-        ]));
+              ),
+            ],
+          ),
+        )
+      ]),
+    );
   }
 }

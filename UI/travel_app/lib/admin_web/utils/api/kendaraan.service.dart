@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class KendaraannService {
   static const String baseUrl = 'http://localhost:3306/admin/kendaraan/';
@@ -31,11 +31,8 @@ class KendaraannService {
     }
   }
 
-  // Menambahkan Kendaraan baru
   static Future<void> createKendaraan(Map<String, dynamic> kendaraan) async {
     final token = await getToken();
-
-
 
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -48,6 +45,8 @@ class KendaraannService {
 
     if (response.statusCode == 201) {
       print("Kendaraan berhasil ditambahkan.");
+      // Log response body untuk memastikan data yang dikirim diterima dengan benar
+      print("Response from server: ${response.body}");
     } else {
       print('Failed to create Kendaraan: ${response.body}');
       throw Exception('Failed to create Kendaraan');

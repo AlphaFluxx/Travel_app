@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TransaksiService {
   static const String baseUrl = 'http://localhost:3306/admin/transaksi';
@@ -34,8 +34,6 @@ class TransaksiService {
   // Menambahkan Transaksi baru
   static Future<void> createTransaksi(Map<String, dynamic> transaksi) async {
     final token = await getToken();
-
-
 
     final response = await http.post(
       Uri.parse(baseUrl),
