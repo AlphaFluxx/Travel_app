@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:travel_app/android/auth/loginscreen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:travel_app/android/auth/auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SignUpScreen extends StatelessWidget {
   @override
@@ -9,6 +10,53 @@ class SignUpScreen extends StatelessWidget {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController usernameController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
+
+    Future<void> _registerUser(
+        String nama, String email, String password) async {
+      final String url = 'http://192.168.110.123:3306/pelanggan/akun/register';
+
+      try {
+        final response = await http.post(
+          Uri.parse(url),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'nama': nama,
+            'email': email,
+            'password': password,
+          }),
+        );
+
+        if (response.statusCode == 201) {
+          // Registrasi berhasil
+          Fluttertoast.showToast(
+            msg: "Registrasi berhasil!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+          );
+
+          // Navigasi ke halaman login
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+          );
+        } else {
+          // Gagal registrasi, tampilkan pesan error
+          final data = json.decode(response.body);
+          Fluttertoast.showToast(
+            msg: "Gagal: ${data['message'] ?? 'Kesalahan tidak diketahui'}",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+          );
+        }
+      } catch (error) {
+        // Error koneksi
+        Fluttertoast.showToast(
+          msg: "Error: $error",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+      }
+    }
 
     return Scaffold(
       body: Container(
@@ -19,7 +67,7 @@ class SignUpScreen extends StatelessWidget {
             colors: [
               Color(0xFF121111),
               Color(0xFFE121111),
-              Color(0xFFF1211111)
+              Color(0xFFF1211111),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -38,8 +86,8 @@ class SignUpScreen extends StatelessWidget {
               ),
               child: Center(
                 child: Image.asset(
-                  'assets/icon/mainlogo.png', // Use Image.asset for local assets
-                  height: 100,
+                  'assets/image/logo_final_white.png',
+                  height: 200,
                 ),
               ),
             ),
@@ -100,39 +148,14 @@ class SignUpScreen extends StatelessWidget {
                         const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () {
-                            if (isEmailInUse(emailController.text)) {
-                              Fluttertoast.showToast(
-                                msg: "Email sudah digunakan",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM,
-                              );
-                            } else if (isUsernameInUse(usernameController.text)) {
-                              Fluttertoast.showToast(
-                                msg: "Username sudah digunakan",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM,
-                              );
-                            } else if (register(usernameController.text, emailController.text, passwordController.text)) {
-                              Fluttertoast.showToast(
-                                msg: "Registrasi berhasil",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM,
-                              );
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => LoginScreen()),
-                              );
-                            } else {
-                              Fluttertoast.showToast(
-                                msg: "Registrasi gagal",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM,
-                              );
-                            }
+                            _registerUser(
+                              usernameController.text,
+                              emailController.text,
+                              passwordController.text,
+                            );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF10E0ED),
+                            backgroundColor: const Color(0xFF10E0ED),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 80, vertical: 15),
                           ),
@@ -173,17 +196,6 @@ class SignUpScreen extends StatelessWidget {
         hintStyle: const TextStyle(color: Colors.grey),
       ),
       style: const TextStyle(color: Colors.black),
-    );
-  }
-
-  Widget _buildSocialButton(Color color) {
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(10),
-      ),
     );
   }
 }

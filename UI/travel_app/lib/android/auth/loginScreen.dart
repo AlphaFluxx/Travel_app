@@ -1,15 +1,70 @@
-// loginscreen.dart
 import 'package:flutter/material.dart';
-import 'package:travel_app/android/main.dart';
-import 'package:travel_app/android/auth/signupscreen.dart'; // Import SignUpScreen
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:travel_app/android/auth/auth.dart'; // Import dummy data
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:travel_app/android/auth/signupscreen.dart';
+import '../home/homeScreen.dart';
 
 class LoginScreen extends StatelessWidget {
+  // Inisialisasi FlutterSecureStorage
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+
   @override
   Widget build(BuildContext context) {
-    final TextEditingController usernameController = TextEditingController();
+    final TextEditingController emailController =
+        TextEditingController(); // Ubah menjadi email
     final TextEditingController passwordController = TextEditingController();
+
+    Future<void> _loginUser(String email, String password) async {
+      final String url = 'http://192.168.110.123:3306/pelanggan/akun/login';
+
+      try {
+        final response = await http.post(
+          Uri.parse(url),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'email': email, 'password': password}),
+        );
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data['token'] != null) {
+            // Simpan token menggunakan FlutterSecureStorage
+            await _secureStorage.write(key: 'jwt_token', value: data['token']);
+
+            Fluttertoast.showToast(
+              msg: "Login Successful",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+            );
+
+            // Navigasi ke halaman utama
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          } else {
+            Fluttertoast.showToast(
+              msg: "Login Failed: Token not received",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+            );
+          }
+        } else {
+          Fluttertoast.showToast(
+            msg: "Login Failed: ${response.reasonPhrase}",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+          );
+        }
+      } catch (error) {
+        Fluttertoast.showToast(
+          msg: "Error: $error",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+      }
+    }
 
     return Scaffold(
       body: Container(
@@ -39,8 +94,8 @@ class LoginScreen extends StatelessWidget {
               ),
               child: Center(
                 child: Image.asset(
-                  'assets/icon/mainlogo.png', // Use Image.asset for local assets
-                  height: 100,
+                  'assets/image/logo_final_white.png',
+                  height: 200,
                 ),
               ),
             ),
@@ -69,33 +124,18 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        _buildTextField('Username', 'assets/icon/person.png',
-                            controller: usernameController),
+                        _buildTextField('Email', 'assets/icon/email.png',
+                            controller: emailController), // Ubah menjadi email
                         const SizedBox(height: 16),
                         _buildTextField('Password', 'assets/icon/lock.png',
                             isPassword: true, controller: passwordController),
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            if (isValidUser(usernameController.text, 
-                                passwordController.text)) {
-                              Fluttertoast.showToast(
-                                msg: "Login Successful",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM,
-                              );
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => HomeScreen()),
-                              );
-                            } else {
-                              Fluttertoast.showToast(
-                                msg: "Invalid Username or Password",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM,
-                              );
-                            }
+                            _loginUser(
+                              emailController.text, // Kirim email
+                              passwordController.text,
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF10E0ED),

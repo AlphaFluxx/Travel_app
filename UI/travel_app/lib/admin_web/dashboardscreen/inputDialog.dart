@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:travel_app/admin_web/utils/api/jadwalHarian.service.dart';
 import 'package:travel_app/admin_web/utils/api/kursi.service.dart';
 import 'package:travel_app/admin_web/utils/api/transaksi.service.dart';
-import '../utils/api/pelanggan.service.dart'; // Pastikan mengimport PelangganService
-import '../dashboardscreen/dashboardScreen.dart';
+import '../utils/api/pelanggan.service.dart';
 import '../utils/api/kendaraan.service.dart';
 
 class InputDialog extends StatefulWidget {
@@ -28,9 +27,14 @@ class _InputDialogState extends State<InputDialog> {
   late Map<String, TextEditingController> controllers;
   late Map<String, String?> errors;
 
-  List<Map<String, dynamic>> availableKendaraan =
-      []; // Daftar kendaraan untuk dropdown
-  String? selectedKendaraanId; // Kendaraan yang dipilih
+  List<Map<String, dynamic>> availableKendaraan = [];
+  List<Map<String, dynamic>> availableJadwal = [];
+  List<Map<String, dynamic>> availableKursi = [];
+  List<Map<String, dynamic>> availablePelanggan = [];
+  String? selectedKendaraanId;
+  String? selectedJadwalId;
+  String? selectedKursiId;
+  String? selectedPelangganId;
 
   @override
   void initState() {
@@ -47,9 +51,8 @@ class _InputDialogState extends State<InputDialog> {
 
     errors = widget.fields.map((key, _) => MapEntry(key, null));
 
-    // Fetch kendaraan data jika field "ID Kendaraan" ada
-    if (widget.fields.containsKey('ID Kendaraan')) {
-      print("Fetching kendaraan data...");
+    // Fetch data untuk dropdown sesuai tabel aktif
+    if (widget.activeTable == 'kursi') {
       KendaraannService.getAllKendaraan().then((kendaraanData) {
         setState(() {
           availableKendaraan = kendaraanData;
@@ -58,17 +61,50 @@ class _InputDialogState extends State<InputDialog> {
       }).catchError((error) {
         print("Error fetching kendaraan data: $error");
       });
+    } else if (widget.activeTable == 'jadwalharian') {
+      KendaraannService.getAllKendaraan().then((kendaraanData) {
+        setState(() {
+          availableKendaraan = kendaraanData;
+          print("Kendaraan data fetched: $availableKendaraan");
+        });
+      }).catchError((error) {
+        print("Error fetching kendaraan data: $error");
+      });
+    } else if (widget.activeTable == 'transaksi') {
+      PelangganService.getAllPelanggan().then((pelangganData) {
+        setState(() {
+          availablePelanggan = pelangganData;
+          print("Pelanggan data fetched: $availablePelanggan");
+        });
+      }).catchError((error) {
+        print("Error fetching pelanggan data: $error");
+      });
+
+      JadwalharianService.getAllJadwalHarian().then((jadwalData) {
+        setState(() {
+          availableJadwal = jadwalData;
+          print("Jadwal data fetched: $availableJadwal");
+        });
+      }).catchError((error) {
+        print("Error fetching jadwal data: $error");
+      });
+
+      KursinService.getAllKursi().then((kursiData) {
+        setState(() {
+          availableKursi = kursiData;
+          print("Kursi data fetched: $availableKursi");
+        });
+      }).catchError((error) {
+        print("Error fetching kursi data: $error");
+      });
     }
   }
 
-  // Validasi hanya untuk field yang kosong
   bool validateFields() {
     bool isValid = true;
     final newErrors = <String, String?>{};
 
     controllers.forEach((key, controller) {
-      print("Validating field: $key, Value: ${controller.text}");
-      // Abaikan validasi untuk field yang tidak wajib diisi
       if (controller.text.isEmpty &&
           !(widget.fields[key]!.contains("optional") ?? false)) {
         isValid = false;
@@ -80,26 +116,18 @@ class _InputDialogState extends State<InputDialog> {
       errors = newErrors;
     });
 
-    print("Validation errors: $errors");
     return isValid;
   }
 
   Future<void> saveData() async {
-    print("Starting save data...");
     if (validateFields()) {
       final result = {
         ...controllers.map((key, controller) => MapEntry(key, controller.text)),
       };
 
-      print("Data to save: $result");
-
       try {
         if (widget.indikator!.isEmpty) {
-          if (widget.activeTable == "pelanggan") {
-            await PelangganService.createPelanggan(result);
-          } else if (widget.activeTable == "kendaraan") {
-            await KendaraannService.createKendaraan(result);
-          } else if (widget.activeTable == "kursi") {
+          if (widget.activeTable == "kursi") {
             await KursinService.createKursi(result);
           } else if (widget.activeTable == "jadwalharian") {
             await JadwalharianService.createJadwalHarian(result);
@@ -107,16 +135,10 @@ class _InputDialogState extends State<InputDialog> {
             await TransaksiService.createTransaksi(result);
           }
         } else {
-          if (widget.activeTable == "pelanggan") {
-            await PelangganService.updatePelanggan(
-                widget.indikator!['ID'], result);
-          } else if (widget.activeTable == "kendaraan") {
-            await KendaraannService.updateKendaraan(
-                widget.indikator!['id_kendaraan'], result);
-          } else if (widget.activeTable == "kursi") {
+          if (widget.activeTable == "kursi") {
             await KursinService.updateKursi(
                 widget.indikator!['id_kursi'], result);
-          } else if (widget.activeTable == "jadwalHarian") {
+          } else if (widget.activeTable == "jadwalharian") {
             await JadwalharianService.updateJadwalHarian(
                 widget.indikator!['id_jadwal'], result);
           } else if (widget.activeTable == "transaksi") {
@@ -124,17 +146,12 @@ class _InputDialogState extends State<InputDialog> {
                 widget.indikator!['id_transaksi'], result);
           }
         }
-
-        print("Data saved successfully, returning result.");
         Navigator.of(context).pop(result);
       } catch (e) {
-        print("Error saving data: $e");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Gagal menyimpan data: $e")),
         );
       }
-    } else {
-      print("Validation failed. Data not saved.");
     }
   }
 
@@ -148,6 +165,83 @@ class _InputDialogState extends State<InputDialog> {
           children: widget.fields.entries.map((entry) {
             final fieldName = entry.key;
             final fieldType = entry.value;
+
+            // Dropdown untuk Kursi
+            if (fieldName == 'id_kendaraan' && widget.activeTable == 'kursi') {
+              return buildDropdown(
+                fieldName,
+                selectedKendaraanId,
+                availableKendaraan,
+                'Pilih Kendaraan',
+                (newValue) {
+                  setState(() {
+                    selectedKendaraanId = newValue;
+                    controllers[fieldName]?.text = newValue ?? '';
+                  });
+                },
+              );
+            }
+
+            // Dropdown untuk Jadwalharian
+            if (fieldName == 'id_kendaraan' &&
+                widget.activeTable == 'jadwalharian') {
+              return buildDropdown(
+                fieldName,
+                selectedKendaraanId,
+                availableKendaraan,
+                'Pilih Kendaraan',
+                (newValue) {
+                  setState(() {
+                    selectedKendaraanId = newValue;
+                    controllers[fieldName]?.text = newValue ?? '';
+                  });
+                },
+              );
+            }
+
+            // Dropdown untuk Transaksi
+            if (widget.activeTable == 'transaksi') {
+              if (fieldName == 'id_pelanggan') {
+                return buildDropdown(
+                  fieldName,
+                  selectedPelangganId,
+                  availablePelanggan,
+                  'Pilih Pelanggan',
+                  (newValue) {
+                    setState(() {
+                      selectedPelangganId = newValue;
+                      controllers[fieldName]?.text = newValue ?? '';
+                    });
+                  },
+                );
+              } else if (fieldName == 'id_jadwal') {
+                return buildDropdown(
+                  fieldName,
+                  selectedJadwalId,
+                  availableJadwal,
+                  'Pilih Jadwal',
+                  (newValue) {
+                    setState(() {
+                      selectedJadwalId = newValue;
+                      controllers[fieldName]?.text = newValue ?? '';
+                    });
+                  },
+                );
+              } else if (fieldName == 'id_kursi') {
+                return buildDropdown(
+                  fieldName,
+                  selectedKursiId,
+                  availableKursi,
+                  'Pilih Kursi',
+                  (newValue) {
+                    setState(() {
+                      selectedKursiId = newValue;
+                      controllers[fieldName]?.text = newValue ?? '';
+                    });
+                  },
+                );
+              }
+            }
 
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -176,6 +270,33 @@ class _InputDialogState extends State<InputDialog> {
           child: const Text("Simpan"),
         ),
       ],
+    );
+  }
+
+  Widget buildDropdown(
+    String fieldName,
+    String? selectedValue,
+    List<Map<String, dynamic>> availableData,
+    String labelText,
+    Function(String?) onChanged,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: DropdownButtonFormField<String>(
+        value: selectedValue,
+        items: availableData.map((data) {
+          return DropdownMenuItem<String>(
+            value: data['id_${fieldName.split('_')[1]}'].toString(),
+            child: Text(data['id_${fieldName.split('_')[1]}'].toString()),
+          );
+        }).toList(),
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: const OutlineInputBorder(),
+          errorText: errors[fieldName],
+        ),
+      ),
     );
   }
 }

@@ -4,13 +4,11 @@ class Kursi {
   final int idKendaraan;
   final bool statusKetersediaan;
 
-
   Kursi({
     required this.idKursi,
     required this.nomorKursi,
     required this.idKendaraan,
     required this.statusKetersediaan,
-
   });
 
   factory Kursi.fromJson(Map<String, dynamic> json) {
@@ -18,7 +16,8 @@ class Kursi {
       idKursi: json['id_kursi'],
       nomorKursi: json['nomor_kursi'],
       idKendaraan: json['id_kendaraan'],
-      statusKetersediaan: json['statusKetersediaan'],
+      statusKetersediaan: json['statusKetersediaan'] ==
+          1, // Mengkonversi 1 menjadi true dan 0 menjadi false
     );
   }
 
@@ -27,7 +26,9 @@ class Kursi {
       'id_kursi': idKursi,
       'nomor_kursi': nomorKursi,
       'id_kendaraan': idKendaraan,
-      'statusKetersediaan': statusKetersediaan,
+      'statusKetersediaan': statusKetersediaan
+          ? 1
+          : 0, // Mengkonversi true menjadi 1 dan false menjadi 0
     };
   }
 }

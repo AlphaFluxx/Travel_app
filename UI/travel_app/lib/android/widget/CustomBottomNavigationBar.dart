@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:travel_app/android/home/historyScreen.dart';
-import '../main.dart'; // Impor MyApp.dart file
+import '../home/homeScreen.dart'; // Impor MyApp.dart file
 import '/android/profile/profileScreen.dart'; // Impor ProfileScreen.dart
 
 class CustomBottomNavigationBar extends StatelessWidget {
@@ -22,7 +22,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         );
         break;
       case 1:
-      Navigator.push(
+        Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => HistoryScreen()),
         );

@@ -25,9 +25,10 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Image.asset(
-                'assets/icon/mainlogo.png',
-                width: 300,
-                height: 300,), // Make sure to add your image to the assets folder and update the path
+              'assets/image/logo_final_white.png',
+              width: 300,
+              height: 300,
+            ), // Make sure to add your image to the assets folder and update the path
             SizedBox(height: 10),
             Text(
               'MTravel',

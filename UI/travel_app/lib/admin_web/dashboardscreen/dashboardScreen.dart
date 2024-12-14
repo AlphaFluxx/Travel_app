@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:travel_app/admin_web/dashboardscreen/jadwalHarianTable.dart';
 import 'package:travel_app/admin_web/dashboardscreen/kendaraanTable.dart';
@@ -111,11 +113,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void _deleteData(String id) async {
+  void _deleteData(String id, String activeTable) async {
     try {
       int parsedId = int.parse(id);
-      await PelangganService.deletePelanggan(parsedId);
-      _showAlert(context, 'Data pelanggan berhasil dihapus.');
+
+      if (activeTable == 'pelanggan') {
+        await PelangganService.deletePelanggan(parsedId);
+        _showAlert(context, 'Data pelanggan berhasil dihapus.');
+      } else if (activeTable == 'kendaraan') {
+        await KendaraannService.deleteKendaraan(parsedId);
+        _showAlert(context, 'Data kendaraan berhasil dihapus.');
+      } else if (activeTable == 'kursi') {
+        await KursinService.deleteKursi(parsedId);
+        _showAlert(context, 'Data kursi berhasil dihapus.');
+      } else if (activeTable == 'jadwalharian') {
+        await JadwalharianService.deleteJadwalHarian(parsedId);
+        _showAlert(context, 'Data jadwal harian berhasil dihapus.');
+      } else if (activeTable == 'transaksi') {
+        await TransaksiService.deleteTransaksi(parsedId);
+        _showAlert(context, 'Data transaksi berhasil dihapus.');
+      } else {
+        _showAlert(context, 'Tabel tidak dikenali.');
+        return;
+      }
+
       refreshTable();
     } catch (e) {
       _showAlert(context, 'Gagal menghapus data: $e');
@@ -194,7 +215,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   title: 'Tambah Kursi',
                                   fields: {
                                     'Nomor Kursi': 'number',
-                                    'ID Kendaraan': 'number',
+                                    'id_kendaraan': 'number',
                                     'StatusKetersediaan': 'number',
                                   },
                                   initialData: {},
@@ -218,8 +239,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     'id_kendaraan': 'number',
                                     'asal': 'text',
                                     'tujuan': 'text',
-                                    'Waktu_berangkat': 'text',
-                                    'Waktu_kedatangan': 'text',
+                                    'waktu_berangkat': 'text',
+                                    'waktu_kedatangan': 'text',
                                     'harga': 'number'
                                   },
                                   activeTable: activeTable,
@@ -347,13 +368,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     'id_kendaraan': 'number',
                                     'asal': 'text',
                                     'tujuan': 'text',
-                                    'Waktu_berangkat': 'text',
-                                    'Waktu_kedatangan': 'text',
+                                    'waktu_berangkat': 'text',
+                                    'waktu_kedatangan': 'text',
                                     'harga': 'number'
                                   },
                                   initialData: {
-                                    'id_jadwalharian': JadwalhariantableState
-                                        .selectedRowjadwal!['id_jadwal'],
                                     'id_kendaraan': JadwalhariantableState
                                         .selectedRowjadwal!['id_kendaraan'],
                                     'asal': JadwalhariantableState
@@ -362,10 +381,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     'tujuan': JadwalhariantableState
                                         .selectedRowjadwal!['tujuan']
                                         .toString(),
-                                    'Waktu berangkat': JadwalhariantableState
+                                    'waktu_berangkat': JadwalhariantableState
                                         .selectedRowjadwal!['waktu_berangkat']
                                         .toString(),
-                                    'Waktu kedatangan': JadwalhariantableState
+                                    'waktu_kedatangan': JadwalhariantableState
                                         .selectedRowjadwal!['waktu_kedatangan']
                                         .toString(),
                                     'harga': JadwalhariantableState
@@ -432,25 +451,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ElevatedButton(
                           onPressed: () {
                             print("Delete requested for table: $activeTable");
-                            if (activeTable == 'pelanggan') {
-                              if (PelangganTableState.selectedRowPelanggan !=
-                                  null) {
-                                String id = PelangganTableState
-                                    .selectedRowPelanggan!['id_pelanggan']
-                                    .toString();
-                                _deleteData(
-                                    id); // Kirim sebagai String ke _deleteData
-                              } else {
-                                _showAlert(context,
-                                    'Silakan pilih data pelanggan terlebih dahulu.');
-                              }
+
+                            if (activeTable == 'pelanggan' &&
+                                PelangganTableState.selectedRowPelanggan !=
+                                    null) {
+                              String id = PelangganTableState
+                                  .selectedRowPelanggan!['id_pelanggan']
+                                  .toString();
+                              _deleteData(id, activeTable);
+                            } else if (activeTable == 'kendaraan' &&
+                                KendaraanTableState.selectedRowKendaraan !=
+                                    null) {
+                              String id = KendaraanTableState
+                                  .selectedRowKendaraan!['id_kendaraan']
+                                  .toString();
+                              _deleteData(id, activeTable);
+                            } else if (activeTable == 'kursi' &&
+                                KursiTableState.selectedRowKursi != null) {
+                              String id = KursiTableState
+                                  .selectedRowKursi!['id_kursi']
+                                  .toString();
+                              _deleteData(id, activeTable);
+                            } else if (activeTable == 'jadwalharian' &&
+                                JadwalhariantableState.selectedRowjadwal !=
+                                    null) {
+                              String id = JadwalhariantableState
+                                  .selectedRowjadwal!['id_jadwal']
+                                  .toString();
+                              _deleteData(id, activeTable);
+                            } else if (activeTable == 'transaksi' &&
+                                TransaksiTableState.selectedRowTransaksi !=
+                                    null) {
+                              String id = TransaksiTableState
+                                  .selectedRowTransaksi!['id_transaksi']
+                                  .toString();
+                              _deleteData(id, activeTable);
+                            } else {
+                              _showAlert(context,
+                                  'Silakan pilih data dari tabel $activeTable terlebih dahulu.');
                             }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                           ),
                           child: const Text('Delete'),
-                        ),
+                        )
                       ],
                     ),
                   ],

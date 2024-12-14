@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class TicketScreen extends StatelessWidget {
   final String asal;
   final String tujuan;
-  final int date;
+  final String date;
   final String time;
   final int seat;
 

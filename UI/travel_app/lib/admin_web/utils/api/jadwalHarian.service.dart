@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class JadwalharianService {
   static const String baseUrl = 'http://localhost:3306/admin/jadwalHarian/';
@@ -32,10 +32,14 @@ class JadwalharianService {
   }
 
   // Menambahkan JadwalHarian baru
-  static Future<void> createJadwalHarian(Map<String, dynamic> jadwalharian) async {
+  static Future<void> createJadwalHarian(
+      Map<String, dynamic> jadwalharian) async {
     final token = await getToken();
 
-
+    // Debugging log: Log the departure and arrival times
+    print('Creating JadwalHarian:');
+    print('Departure Time: ${jadwalharian['waktu_berangkat']}');
+    print('Arrival Time: ${jadwalharian['waktu_kedatangan']}');
 
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -58,6 +62,12 @@ class JadwalharianService {
   static Future<void> updateJadwalHarian(
       int id, Map<String, dynamic> jadwalharian) async {
     final token = await getToken();
+
+    // Debugging log: Log the departure and arrival times
+    print('Updating JadwalHarian with ID $id:');
+    print('Departure Time: ${jadwalharian['waktu_berangkat']}');
+    print('Arrival Time: ${jadwalharian['waktu_kedatangan']}');
+
     final response = await http.put(
       Uri.parse('$baseUrl/$id'),
       headers: {
@@ -68,13 +78,20 @@ class JadwalharianService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to update pelanggan');
+      print('Failed to update JadwalHarian: ${response.body}');
+      throw Exception('Failed to update JadwalHarian');
+    } else {
+      print("JadwalHarian updated successfully.");
     }
   }
 
   // Menghapus JadwalHarian
   static Future<void> deleteJadwalHarian(int id) async {
     final token = await getToken();
+
+    // Debugging log: Log the ID of the JadwalHarian being deleted
+    print('Deleting JadwalHarian with ID: $id');
+
     final response = await http.delete(
       Uri.parse('$baseUrl/$id'),
       headers: {
@@ -84,7 +101,10 @@ class JadwalharianService {
     );
 
     if (response.statusCode != 200) {
+      print('Failed to delete JadwalHarian: ${response.body}');
       throw Exception('Failed to delete JadwalHarian');
+    } else {
+      print("JadwalHarian deleted successfully.");
     }
   }
 }

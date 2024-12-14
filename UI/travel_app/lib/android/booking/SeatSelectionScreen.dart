@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '/android/booking/jadwal.dart';
+import 'jadwalScreen.dart';
 import '../payment/payment.dart';
-import 'package:fluttertoast/fluttertoast.dart'; 
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SeatSelectionScreen extends StatefulWidget {
   final String asal;
   final String tujuan;
-  final int date;
+  final String date;
   final String time;
 
   const SeatSelectionScreen({
@@ -51,10 +51,10 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                 ),
               );
             },
-            backgroundColor: const Color(0xFF1A1B1F), 
+            backgroundColor: const Color(0xFF1A1B1F),
             foregroundColor: Colors.white,
-            tooltip: 'Back', // 
-            shape: const CircleBorder(), 
+            tooltip: 'Back', //
+            shape: const CircleBorder(),
             child: ColorFiltered(
               colorFilter:
                   const ColorFilter.mode(Colors.white, BlendMode.srcIn),
@@ -66,7 +66,8 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
       body: Column(
         children: [
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            margin:
+                const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
               color: const Color.fromRGBO(48, 46, 46, 1),
@@ -121,7 +122,8 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
           ),
           Expanded(
             child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 30.0),
+              margin:
+                  const EdgeInsets.symmetric(vertical: 20.0, horizontal: 30.0),
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 color: const Color.fromRGBO(48, 46, 46, 1),

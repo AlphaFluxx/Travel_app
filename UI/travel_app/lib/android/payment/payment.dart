@@ -4,7 +4,7 @@ import '../booking/ticket_screen.dart';
 class PaymentScreen extends StatelessWidget {
   final String asal;
   final String tujuan;
-  final int date;
+  final String date;
   final String time;
   final int seat;
 
@@ -35,7 +35,7 @@ class PaymentScreen extends StatelessWidget {
 class PaymentMethodScreen extends StatefulWidget {
   final String asal;
   final String tujuan;
-  final int date;
+  final String date;
   final String time;
   final int seat;
 
@@ -72,12 +72,13 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             onPressed: () {
               Navigator.pop(context);
             },
-            backgroundColor: const Color(0xFF1A1B1F), 
-            foregroundColor: Colors.white, 
-            tooltip: 'Back', 
-            shape: const CircleBorder(), 
+            backgroundColor: const Color(0xFF1A1B1F),
+            foregroundColor: Colors.white,
+            tooltip: 'Back',
+            shape: const CircleBorder(),
             child: ColorFiltered(
-              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
               child: Image.asset('assets/icon/back.png'),
             ),
           ),
@@ -151,7 +152,6 @@ class PaymentMethodCard extends StatelessWidget {
               width: 200,
               height: 30,
               color: Colors.grey[300],
-              
             ),
           ),
           OutlinedButton(
@@ -177,7 +177,7 @@ class PaymentMethodCard extends StatelessWidget {
 class ConfirmButton extends StatelessWidget {
   final String asal;
   final String tujuan;
-  final int date;
+  final String date;
   final String time;
   final int seat;
 
