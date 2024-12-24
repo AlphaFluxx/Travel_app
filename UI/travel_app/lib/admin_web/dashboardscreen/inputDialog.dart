@@ -109,7 +109,7 @@ class _InputDialogState extends State<InputDialog> {
 
     controllers.forEach((key, controller) {
       if (controller.text.isEmpty &&
-          !(widget.fields[key]!.contains("optional") ?? false)) {
+          !(widget.fields[key]!.contains("optional"))) {
         isValid = false;
         newErrors[key] = "$key tidak boleh kosong";
       }

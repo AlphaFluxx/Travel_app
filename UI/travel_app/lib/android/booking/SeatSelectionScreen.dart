@@ -1,7 +1,6 @@
 import '../service/kursiService.dart';
 import 'package:flutter/material.dart';
 import 'jadwalScreen.dart';
-import '../payment/payment.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
