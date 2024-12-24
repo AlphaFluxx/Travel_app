@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '/android/widget/CustomBottomNavigationBar.dart'; // Import the CustomBottomNavigationBar
+import '/android/widget/CustomBottomNavigationBar.dart'; 
 
-// Widget utama untuk halaman riwayat
 class HistoryScreen extends StatefulWidget {
   @override
   _HistoryScreenState createState() => _HistoryScreenState();
@@ -20,11 +19,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0), // Padding di sekitar Column
+        padding: const EdgeInsets.all(16.0), 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Riwayat',
               style: TextStyle(
                 color: Colors.white,
@@ -32,9 +31,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
-            ),
-            const SizedBox(height: 16), // Beri jarak antara teks "Riwayat" dan daftar tiket
-            Expanded(child: TicketList()), // Menempatkan daftar tiket di bawah teks "Riwayat"
+            ), 
+            const SizedBox(height: 16),
+            Expanded(child: TicketList()), 
           ],
         ),
       ),
@@ -47,23 +46,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 }
 
-// Widget untuk daftar tiket
 class TicketList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: 3, // Misalkan ada 3 tiket
+      itemCount: 3, 
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
-            // Aksi saat tiket di-klik, misalnya navigasi ke layar detail tiket
+            
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: const Color(0xFF2A2B2E), // Warna latar belakang kontainer tiket
+                color: const Color(0xFF2A2B2E), 
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -104,7 +102,7 @@ class TicketList extends StatelessWidget {
                         ],
                       ),
                       Image.asset(
-                        'assets/icon/bus.png', // Ganti dengan path ikon bus
+                        'assets/icon/bus.png',
                         width: 40,
                         height: 40,
                       ),

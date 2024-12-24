@@ -3,12 +3,12 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class KendaraannService {
-  static const String baseUrl = 'http://localhost:3306/admin/kendaraan/';
+  static const String baseUrl = 'http://192.168.110.123:3306/admin/kendaraan';
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Function to get the token from storage
   static Future<String?> getToken() async {
-    return await _storage.read(key: 'token'); // Replace 'token' with your key
+    return await _storage.read(key: 'token');
   }
 
   // Mendapatkan semua data Kendaraan
@@ -19,7 +19,7 @@ class KendaraannService {
       headers: {
         'Content-Type': 'application/json',
         if (token != null)
-          'Authorization': 'Bearer $token', // Add token to headers
+          'Authorization': 'Bearer $token', 
       },
     );
 

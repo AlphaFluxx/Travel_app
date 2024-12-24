@@ -1,6 +1,10 @@
+
+// ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
+
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'auth/loginscreen.dart'; // Make sure to create loginscreen.dart with your login screen implementation
+import 'widget/animations.dart'; 
+import 'auth/loginScreen.dart'; 
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -11,9 +15,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 1), () {
       Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => LoginScreen()));
+        createFadeRoute(LoginScreen()),
+      );
     });
   }
 
@@ -28,10 +33,10 @@ class _SplashScreenState extends State<SplashScreen> {
               'assets/image/logo_final_white.png',
               width: 300,
               height: 300,
-            ), // Make sure to add your image to the assets folder and update the path
-            SizedBox(height: 10),
-            Text(
-              'MTravel',
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'HorizonTravel',
               style: TextStyle(
                 fontSize: 24,
                 color: Colors.white,

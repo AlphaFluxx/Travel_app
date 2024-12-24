@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TransaksiService {
-  static const String baseUrl = 'http://localhost:3306/admin/transaksi';
+  static const String baseUrl = 'http://192.168.110.123:3306/admin/transaksi';
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Function to get the token from storage

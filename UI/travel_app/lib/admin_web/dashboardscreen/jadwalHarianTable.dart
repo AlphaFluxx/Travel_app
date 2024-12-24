@@ -45,6 +45,7 @@ class JadwalhariantableState extends State<Jadwalhariantable> {
                 DataColumn(label: Text('Tujuan')),
                 DataColumn(label: Text('Waktu Berangkat')),
                 DataColumn(label: Text('Waktu Kedatangan')),
+                DataColumn(label: Text('Tanggal Keberangkatan')),
                 DataColumn(label: Text('Harga')),
               ],
               rows: jadwalData.map((jadwal) {
@@ -76,6 +77,8 @@ class JadwalhariantableState extends State<Jadwalhariantable> {
                     DataCell(Text(jadwal['tujuan'].toString())),
                     DataCell(Text(jadwal['waktu_berangkat'].toString())),
                     DataCell(Text(jadwal['waktu_kedatangan'].toString())),
+                    DataCell(Text(jadwal['tanggal_keberangkatan']
+                        .toString())), // Kolom baru
                     DataCell(Text(jadwal['harga'].toString())),
                   ],
                 );

@@ -23,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _login() async {
-    final url = Uri.parse('http://localhost:3306/admin/akun/login');
+    final url = Uri.parse('http://192.168.110.123:3306/admin/akun/login');
     final body = {
       'nama': _usernameController.text,
       'password': _passwordController.text,

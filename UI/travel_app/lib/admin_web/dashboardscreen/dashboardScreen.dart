@@ -63,6 +63,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         initialData: initialData,
         activeTable: activeTable,
         indikator: indikator,
+        refreshTable: refreshTable,
       ),
     );
 
@@ -224,38 +225,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             } else if (activeTable == 'kendaraan') {
                               _showInputDialog(
                                   title: 'Tambah kendaraan',
-                                  initialData: {},
                                   fields: {
                                     'jenis_kendaraan': 'text',
                                     'kapasitas': 'number'
                                   },
+                                  initialData: {},
                                   activeTable: activeTable,
                                   indikator: {});
                             } else if (activeTable == 'jadwalharian') {
                               _showInputDialog(
                                   title: 'Tambah jadwal',
-                                  initialData: {},
                                   fields: {
                                     'id_kendaraan': 'number',
                                     'asal': 'text',
                                     'tujuan': 'text',
                                     'waktu_berangkat': 'text',
                                     'waktu_kedatangan': 'text',
-                                    'harga': 'number'
+                                    'harga': 'number',
+                                    'tanggal_keberangkatan': 'date'
                                   },
                                   activeTable: activeTable,
+                                  initialData: {},
                                   indikator: {});
                             } else if (activeTable == 'transaksi') {
                               _showInputDialog(
                                   title: 'Tambah transaksi',
-                                  initialData: {},
                                   fields: {
                                     'id_pelanggan': 'number',
                                     'id_jadwal': 'number',
                                     'id_kursi': 'number',
-                                    'tanggal': 'number',
-                                    'status_transaksi': 'text'
+                                    'status_transaksi': 'text',
+                                    'tanggal_reservasi': 'date'
                                   },
+                                  initialData: {},
                                   activeTable: activeTable,
                                   indikator: {});
                             }
@@ -292,7 +294,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           .toString(),
                                     },
                                     indikator: {
-                                      'ID': PelangganTableState
+                                      'id_pelanggan': PelangganTableState
                                               .selectedRowPelanggan![
                                           'id_pelanggan'],
                                     },
@@ -370,7 +372,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     'tujuan': 'text',
                                     'waktu_berangkat': 'text',
                                     'waktu_kedatangan': 'text',
-                                    'harga': 'number'
+                                    'harga': 'number',
+                                    'tanggal_keberangkatan': 'date'
                                   },
                                   initialData: {
                                     'id_kendaraan': JadwalhariantableState
@@ -388,7 +391,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         .selectedRowjadwal!['waktu_kedatangan']
                                         .toString(),
                                     'harga': JadwalhariantableState
-                                        .selectedRowjadwal!['harga']
+                                        .selectedRowjadwal!['harga'],
+                                    'tanggal_keberangkatan':
+                                        JadwalhariantableState
+                                                .selectedRowjadwal![
+                                            'tanggal_keberangkatan']
                                   },
                                   activeTable: activeTable,
                                   indikator: {
@@ -410,8 +417,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     'id_pelanggan': 'number',
                                     'id_jadwal': 'number',
                                     'id_kursi': 'number',
-                                    'tanggal': 'text',
-                                    'status_transaksi': 'text'
+                                    'status_transaksi': 'text',
+                                    'tanggal_reservasi': 'date'
                                   },
                                   initialData: {
                                     'id_transaksi': TransaksiTableState
@@ -429,6 +436,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         .selectedRowTransaksi![
                                             'status_transaksi']
                                         .toString(),
+                                    'tanggal_reservasi': TransaksiTableState
+                                            .selectedRowTransaksi![
+                                        'tanggal_reservasi'],
                                   },
                                   activeTable: activeTable,
                                   indikator: {

@@ -5,6 +5,7 @@ class JadwalHarian {
   final String waktuBerangkat;
   final String waktuKedatangan;
   final int harga;
+  final String jenisKendaraan;
 
   JadwalHarian({
     required this.id,
@@ -13,6 +14,7 @@ class JadwalHarian {
     required this.waktuBerangkat,
     required this.waktuKedatangan,
     required this.harga,
+    required this.jenisKendaraan,
   });
 
   factory JadwalHarian.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,8 @@ class JadwalHarian {
       waktuBerangkat: json['waktu_berangkat'],
       waktuKedatangan: json['waktu_kedatangan'],
       harga: json['harga'],
+      jenisKendaraan:
+          json['jenis_kendaraan'] ?? 'Unknown', // Pastikan jenis kendaraan ada
     );
   }
 }

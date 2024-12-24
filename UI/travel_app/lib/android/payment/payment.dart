@@ -2,33 +2,33 @@ import 'package:flutter/material.dart';
 import '../booking/ticket_screen.dart';
 
 class PaymentScreen extends StatelessWidget {
-  final String asal;
-  final String tujuan;
-  final String date;
-  final String time;
-  final int seat;
+  // final String asal;
+  // final String tujuan;
+  // final String date;
+  // final String time;
+  // final int seat;
 
   const PaymentScreen({
     super.key,
-    required this.asal,
-    required this.tujuan,
-    required this.date,
-    required this.time,
-    required this.seat,
+    // required this.asal,
+    // required this.tujuan,
+    // required this.date,
+    // required this.time,
+    // required this.seat,
   });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: PaymentMethodScreen(
-        asal: asal,
-        tujuan: tujuan,
-        date: date,
-        time: time,
-        seat: seat,
-      ),
-      debugShowCheckedModeBanner: false,
-    );
+        // home: PaymentMethodScreen(
+        // asal: asal,
+        // tujuan: tujuan,
+        // date: date,
+        // time: time,
+        // seat: seat,
+        //   ),
+        //   debugShowCheckedModeBanner: false,
+        );
   }
 }
 

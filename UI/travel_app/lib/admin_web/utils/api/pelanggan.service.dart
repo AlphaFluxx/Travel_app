@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Example for secure storage
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class PelangganService {
-  static const String baseUrl = 'http://localhost:3306/admin/pelanggan/';
+  static const String baseUrl = 'http://192.168.110.123:3306/admin/pelanggan/';
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Function to get the token from storage
   static Future<String?> getToken() async {
-    return await _storage.read(key: 'token'); // Replace 'token' with your key
+    return await _storage.read(key: 'token');
   }
 
   // Mendapatkan semua data pelanggan
@@ -38,8 +38,7 @@ class PelangganService {
     // Hapus field yang tidak diperlukan
     pelanggan.removeWhere((key, value) => value == null || key == 'id');
 
-    print(
-        "Sending create request for pelanggan: $pelanggan"); // Log data yang dikirim
+    print("Sending create request for pelanggan: $pelanggan");
 
     final response = await http.post(
       Uri.parse(baseUrl),

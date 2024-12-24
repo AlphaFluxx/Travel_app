@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class KursinService {
-  static const String baseUrl = 'http://localhost:3306/admin/kursi/';
+  static const String baseUrl = 'http://192.168.110.123:3306/admin/kursi/';
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Function to get the token from storage
@@ -35,8 +35,6 @@ class KursinService {
   static Future<void> createKursi(Map<String, dynamic> kursi) async {
     final token = await getToken();
 
-
-
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: {
@@ -55,8 +53,7 @@ class KursinService {
   }
 
   // Memperbarui kursi
-  static Future<void> updateKursi(
-      int id, Map<String, dynamic> kursi) async {
+  static Future<void> updateKursi(int id, Map<String, dynamic> kursi) async {
     final token = await getToken();
     final response = await http.put(
       Uri.parse('$baseUrl/$id'),

@@ -10,6 +10,7 @@ class InputDialog extends StatefulWidget {
   final Map<String, dynamic>? initialData;
   final String activeTable;
   final Map<String, dynamic>? indikator;
+  final Function refreshTable;
 
   const InputDialog({
     Key? key,
@@ -17,6 +18,7 @@ class InputDialog extends StatefulWidget {
     this.initialData,
     required this.activeTable,
     this.indikator,
+    required this.refreshTable,
   }) : super(key: key);
 
   @override
@@ -39,6 +41,7 @@ class _InputDialogState extends State<InputDialog> {
   @override
   void initState() {
     super.initState();
+
     print("Initializing InputDialog...");
 
     controllers = widget.fields.map((key, _) {
@@ -133,6 +136,10 @@ class _InputDialogState extends State<InputDialog> {
             await JadwalharianService.createJadwalHarian(result);
           } else if (widget.activeTable == "transaksi") {
             await TransaksiService.createTransaksi(result);
+          } else if (widget.activeTable == "pelanggan") {
+            await PelangganService.createPelanggan(result);
+          } else if (widget.activeTable == "kendaraan") {
+            await KendaraannService.createKendaraan(result);
           }
         } else {
           if (widget.activeTable == "kursi") {
@@ -144,9 +151,14 @@ class _InputDialogState extends State<InputDialog> {
           } else if (widget.activeTable == "transaksi") {
             await TransaksiService.updateTransaksi(
                 widget.indikator!['id_transaksi'], result);
+          } else if (widget.activeTable == "pelanggan") {
+            await PelangganService.updatePelanggan(
+                widget.indikator!['id_pelanggan'], result);
+          } else if (widget.activeTable == "kendaraan") {
+            await KendaraannService.updateKendaraan(
+                widget.indikator!['id_kendaraan'], result);
           }
         }
-        Navigator.of(context).pop(result);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Gagal menyimpan data: $e")),
@@ -266,7 +278,11 @@ class _InputDialogState extends State<InputDialog> {
           child: const Text("Batal"),
         ),
         ElevatedButton(
-          onPressed: saveData,
+          onPressed: () async {
+            await saveData();
+            widget.refreshTable();
+            Navigator.of(context).pop();
+          },
           child: const Text("Simpan"),
         ),
       ],

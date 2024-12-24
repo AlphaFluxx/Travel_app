@@ -1,9 +1,12 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers, prefer_const_declarations, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:travel_app/android/auth/signupscreen.dart';
+import 'package:travel_app/android/widget/animations.dart';
 import '../home/homeScreen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -12,8 +15,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController emailController =
-        TextEditingController(); // Ubah menjadi email
+    final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
     Future<void> _loginUser(String email, String password) async {
@@ -28,9 +30,14 @@ class LoginScreen extends StatelessWidget {
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
-          if (data['token'] != null) {
-            // Simpan token menggunakan FlutterSecureStorage
+
+          if (data['token'] != null &&
+              data['user'] != null &&
+              data['user']['id_pelanggan'] != null) {
             await _secureStorage.write(key: 'jwt_token', value: data['token']);
+            await _secureStorage.write(
+                key: 'idpelanggan',
+                value: data['user']['id_pelanggan'].toString());
 
             Fluttertoast.showToast(
               msg: "Login Successful",
@@ -41,11 +48,11 @@ class LoginScreen extends StatelessWidget {
             // Navigasi ke halaman utama
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
+              createFadeRoute(HomeScreen()),
             );
           } else {
             Fluttertoast.showToast(
-              msg: "Login Failed: Token not received",
+              msg: "Login Failed: Data tidak lengkap",
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.BOTTOM,
             );
@@ -125,7 +132,7 @@ class LoginScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         _buildTextField('Email', 'assets/icon/email.png',
-                            controller: emailController), // Ubah menjadi email
+                            controller: emailController),
                         const SizedBox(height: 16),
                         _buildTextField('Password', 'assets/icon/lock.png',
                             isPassword: true, controller: passwordController),
@@ -157,8 +164,7 @@ class LoginScreen extends StatelessWidget {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                      builder: (context) => SignUpScreen()),
+                                  createFadeRoute(SignUpScreen()),
                                 );
                               },
                               child: const Text(

@@ -24,11 +24,9 @@ class PelangganTableState extends State<PelangganTable> {
   late Future<List<Map<String, dynamic>>> pelangganFuture;
   final ScrollController _scrollController = ScrollController();
   String _maskPassword(String password, [int limit = 6]) {
-  final maskedLength = password.length > limit ? limit : password.length;
-  return List.generate(maskedLength, (_) => '●').join();
-}
-
-
+    final maskedLength = password.length > limit ? limit : password.length;
+    return List.generate(maskedLength, (_) => '●').join();
+  }
 
   @override
   Widget build(BuildContext context) {

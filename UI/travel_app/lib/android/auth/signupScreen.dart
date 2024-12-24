@@ -1,8 +1,11 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:travel_app/android/auth/loginscreen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:travel_app/android/widget/animations.dart'; // Pastikan mengimpor animations.dart
 
 class SignUpScreen extends StatelessWidget {
   @override
@@ -13,7 +16,7 @@ class SignUpScreen extends StatelessWidget {
 
     Future<void> _registerUser(
         String nama, String email, String password) async {
-      final String url = 'http://192.168.110.123:3306/pelanggan/akun/register';
+      const String url = 'http://192.168.110.123:3306/pelanggan/akun/register';
 
       try {
         final response = await http.post(
@@ -37,7 +40,7 @@ class SignUpScreen extends StatelessWidget {
           // Navigasi ke halaman login
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => LoginScreen()),
+            createFadeRoute(LoginScreen()),
           );
         } else {
           // Gagal registrasi, tampilkan pesan error
@@ -131,8 +134,7 @@ class SignUpScreen extends StatelessWidget {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                      builder: (context) => LoginScreen()),
+                                  createFadeRoute(LoginScreen()),
                                 );
                               },
                               child: const Text(

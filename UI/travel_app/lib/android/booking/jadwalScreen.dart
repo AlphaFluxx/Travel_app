@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:travel_app/android/home/homeScreen.dart';
 import '../widget/CustomBottomNavigationBar.dart';
 import '/android/booking/SeatSelectionScreen.dart';
@@ -11,9 +12,6 @@ class Jadwal extends StatefulWidget {
   final String asal;
   final String tujuan;
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
-  Future<void> saveToken(String token) async {
-    await secureStorage.write(key: 'jwt_token', value: token);
-  }
 
   Jadwal({required this.asal, required this.tujuan});
 
@@ -25,44 +23,103 @@ class _JadwalState extends State<Jadwal> {
   int _selectedIndex = 0;
   int _selectedBoxIndex = -1;
 
+  Future<String?> getIdPelanggan() async {
+    try {
+      const storage = FlutterSecureStorage();
+      String? idPelanggan = await storage.read(key: 'idpelanggan');
+      return idPelanggan; 
+    } catch (error) {
+      return null;
+    }
+  }
+
   final ScrollController _scrollController = ScrollController();
   String tanggal = '';
-  int sisaKursi = 14; // Default
-  int harga = 45000; // Default
   List<JadwalHarian> jadwalHarianList = [];
-  bool isLoading = false; // Indikator loading
+  bool isLoading = false;
+  Map<int, int> sisaKursiMap = {};
+
+  final JadwalHarianService service = JadwalHarianService();
 
   Future<void> _loadJadwalHarian() async {
     setState(() {
       isLoading = true;
+      jadwalHarianList.clear();
     });
-
     String? token = await widget.secureStorage.read(key: 'jwt_token');
     if (token == null) {
-      print('Token tidak ditemukan!');
       setState(() {
         isLoading = false;
       });
       return;
     }
-
     try {
-      JadwalHarianService service = JadwalHarianService();
+      if (tanggal.isEmpty) {
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
 
-      print('Memulai request jadwal harian dengan token: $token');
-      List<JadwalHarian> jadwal = await service
-          .fetchJadwalHarian(widget.asal, widget.tujuan, token: token);
+      DateTime selectedDate = DateTime.parse(
+          "${tanggal.split('-')[2]}-${tanggal.split('-')[1]}-${tanggal.split('-')[0]}");
+      String formattedTanggal =
+          "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+
+      List<JadwalHarian> jadwal = await service.fetchJadwalHarian(
+        widget.asal,
+        widget.tujuan,
+        formattedTanggal,
+        token: token,
+      );
 
       setState(() {
         jadwalHarianList = jadwal;
       });
+
+      // Debugging hasil response
+      jadwal.forEach((jadwalItem) {});
+
+      for (var jadwal in jadwalHarianList) {
+        _fetchSisaKursi(jadwal.id, token);
+      }
+
+      // Periksa apakah jadwal tersedia setelah semua data dimuat
     } catch (e) {
-      print('Error loading jadwal harian: $e');
     } finally {
       setState(() {
         isLoading = false;
       });
     }
+  }
+
+  Map<int, int> idKendaraanMap = {};
+  Map<int, String> jenisKendaraanMap =
+      {}; // Menyimpan jenis kendaraan per idJadwal
+
+  Future<void> _fetchSisaKursi(int idJadwal, String token) async {
+    try {
+      final result =
+          await service.fetchSisaKursiAndIdKendaraan(idJadwal, token: token);
+      setState(() {
+        sisaKursiMap[idJadwal] = result['sisaKursi'];
+        jenisKendaraanMap[idJadwal] = result['jenisKendaraan'];
+        idKendaraanMap[idJadwal] =
+            result['id_kendaraan']; // Simpan id_kendaraan
+      });
+    } catch (e) {}
+  }
+
+  void _showToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.black,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
   }
 
   @override
@@ -71,42 +128,17 @@ class _JadwalState extends State<Jadwal> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrentDate();
     });
-    _loadJadwalHarian(); // Memuat data jadwal harian saat halaman dimuat
   }
 
   void _scrollToCurrentDate() {
     DateTime now = DateTime.now();
-    double targetPosition = (now.day - 1) * 76.0; // Menghitung posisi scroll
+    double targetPosition = (now.day - 1) * 76.0;
     _scrollController.jumpTo(targetPosition > 0 ? targetPosition - 152.0 : 0);
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 
   String formatTime(String time) {
     List<String> timeParts = time.split(":");
     return "${timeParts[0]}:${timeParts[1]}";
-  }
-
-  String getMonthName(int month) {
-    const months = [
-      "Januari",
-      "Februari",
-      "Maret",
-      "April",
-      "Mei",
-      "Juni",
-      "Juli",
-      "Agustus",
-      "September",
-      "Oktober",
-      "November",
-      "Desember"
-    ];
-    return months[month - 1];
   }
 
   @override
@@ -115,6 +147,11 @@ class _JadwalState extends State<Jadwal> {
     int currentDay = now.day;
     int currentMonth = now.month;
     int daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+
+    List<JadwalHarian> availableJadwal = jadwalHarianList
+        .where((jadwal) =>
+            sisaKursiMap[jadwal.id] != null && sisaKursiMap[jadwal.id]! > 0)
+        .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFF121111),
@@ -144,8 +181,7 @@ class _JadwalState extends State<Jadwal> {
                 const SizedBox(width: 20),
                 Text(
                   widget.asal,
-                  style: const TextStyle(
-                      color: Colors.white, fontFamily: 'Sarabun', fontSize: 16),
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
                 const SizedBox(width: 30),
                 ColorFiltered(
@@ -156,8 +192,7 @@ class _JadwalState extends State<Jadwal> {
                 ),
                 Text(
                   widget.tujuan,
-                  style: const TextStyle(
-                      color: Colors.white, fontFamily: 'Sarabun', fontSize: 16),
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ],
             ),
@@ -179,8 +214,7 @@ class _JadwalState extends State<Jadwal> {
                       : () {
                           setState(() {
                             _selectedBoxIndex = index;
-                            tanggal =
-                                "$day ${getMonthName(currentMonth)} ${now.year}";
+                            tanggal = "$day-${now.month}-${now.year}";
                           });
                           _loadJadwalHarian();
                         },
@@ -199,18 +233,9 @@ class _JadwalState extends State<Jadwal> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              getMonthName(currentMonth),
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Sarabun',
-                                  fontSize: 12),
-                            ),
-                            Text(
                               "$day",
                               style: const TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Sarabun',
-                                  fontSize: 14),
+                                  color: Colors.white, fontSize: 14),
                             ),
                           ],
                         ),
@@ -222,103 +247,115 @@ class _JadwalState extends State<Jadwal> {
             ),
           ),
           const SizedBox(height: 20),
-          if (isLoading) // Indikator loading
+          if (isLoading)
             const Center(child: CircularProgressIndicator())
-          else if (_selectedBoxIndex != -1) // Jika ada jadwal yang dipilih
+          else if (availableJadwal.isNotEmpty)
             Expanded(
               child: ListView.builder(
-                itemCount: jadwalHarianList.length,
+                itemCount: availableJadwal.length,
                 itemBuilder: (context, index) {
-                  var jadwal = jadwalHarianList[index];
+                  var jadwal = availableJadwal[index];
+                  int? sisaKursi = sisaKursiMap[jadwal.id];
+
                   return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SeatSelectionScreen(
-                            asal: widget.asal,
-                            tujuan: widget.tujuan,
-                            date: tanggal,
-                            time:
-                                "${formatTime(jadwal.waktuBerangkat)} - ${formatTime(jadwal.waktuKedatangan)}",
-                          ),
-                        ),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10.0, horizontal: 16.0),
-                      child: Container(
-                        padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1A1B1F),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      onTap: () async {
+                        String? idPelanggan = await getIdPelanggan();
+                        if (idPelanggan != null && idPelanggan.isNotEmpty) {
+                          try {
+                            int parsedId = int.parse(
+                                idPelanggan); // Pastikan parsing berhasil
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SeatSelectionScreen(
+                                  asal: widget.asal,
+                                  tujuan: widget.tujuan,
+                                  tanggal: tanggal,
+                                  waktu_berangkat: jadwal.waktuBerangkat,
+                                  waktu_kedatangan: jadwal.waktuKedatangan,
+                                  idJadwal: jadwal.id,
+                                  idPelanggan: parsedId,
+                                  harga: jadwal.harga,
+                                  idKendaraan: idKendaraanMap[jadwal.id] ?? 0,
+                                  jenisKendaraan:
+                                      jenisKendaraanMap[jadwal.id] ??
+                                          'Tidak Diketahui',
+                                ),
+                              ),
+                            );
+                          } catch (e) {
+                            _showToast(
+                                'Id pelanggan tidak valid. Silakan login ulang.');
+                          }
+                        } else {
+                          _showToast(
+                              'Id pelanggan tidak ditemukan. Silakan login ulang.');
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        child: Stack(
                           children: [
-                            Text(
-                              "Rp ${jadwal.harga}/Kursi",
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Sarabun',
-                                  fontSize: 16),
+                            Container(
+                              padding: const EdgeInsets.all(16.0),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1A1B1F),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Rp ${jadwal.harga}/Kursi",
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 16)),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    sisaKursi != null
+                                        ? "Sisa Kursi: $sisaKursi"
+                                        : "Memuat sisa kursi...",
+                                    style: const TextStyle(
+                                        color: Colors.grey, fontSize: 14),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(formatTime(jadwal.waktuBerangkat),
+                                          style: const TextStyle(
+                                              color: Colors.cyan,
+                                              fontSize: 16)),
+                                      const Text("3 jam perjalanan",
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 14)),
+                                      Text(formatTime(jadwal.waktuKedatangan),
+                                          style: const TextStyle(
+                                              color: Colors.cyan,
+                                              fontSize: 16)),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 4),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  widget.asal,
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 4.0, horizontal: 8.0),
+                                decoration: BoxDecoration(),
+                                child: Text(
+                                  "Jenis Armada: ${jenisKendaraanMap[jadwal.id] ?? 'Tidak Diketahui'}", // Ganti dengan jenis kendaraan yang sesuai
                                   style: const TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Sarabun',
-                                      fontSize: 16),
+                                      color: Colors.grey, fontSize: 14),
                                 ),
-                                Image.asset('assets/icon/bus.png',
-                                    width: 40, height: 40),
-                                Text(
-                                  widget.tujuan,
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Sarabun',
-                                      fontSize: 16),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  formatTime(jadwal.waktuBerangkat),
-                                  style: const TextStyle(
-                                      color: Colors.cyan,
-                                      fontFamily: 'Sarabun',
-                                      fontSize: 16),
-                                ),
-                                const Text(
-                                  "3 jam perjalanan",
-                                  style: TextStyle(
-                                      color: Colors.grey,
-                                      fontFamily: 'Sarabun',
-                                      fontSize: 14),
-                                ),
-                                Text(
-                                  formatTime(jadwal.waktuKedatangan),
-                                  style: const TextStyle(
-                                      color: Colors.cyan,
-                                      fontFamily: 'Sarabun',
-                                      fontSize: 16),
-                                ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                  );
+                      ));
                 },
               ),
             ),
@@ -329,5 +366,11 @@ class _JadwalState extends State<Jadwal> {
         onItemTapped: _onItemTapped,
       ),
     );
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 }

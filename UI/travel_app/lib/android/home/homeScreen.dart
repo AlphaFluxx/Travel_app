@@ -192,14 +192,14 @@ class FormPencarianTiket extends StatefulWidget {
   final List<String> tujuanList;
   final Function fetchTujuan;
   final String? tujuanTerpilih;
-  final Function(String?, String?) onCariTiketPressed; // Tambahkan callback
+  final Function(String?, String?) onCariTiketPressed; 
 
   FormPencarianTiket({
     required this.asalList,
     required this.tujuanList,
     required this.fetchTujuan,
     required this.tujuanTerpilih,
-    required this.onCariTiketPressed, // Inisialisasi callback
+    required this.onCariTiketPressed, 
   });
 
   @override
@@ -221,8 +221,8 @@ class _FormPencarianTiketState extends State<FormPencarianTiket> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _bangunDropdownField(
-          'Pilih Asal',
+        _buildDropdownField(
+          'Pilih Titik Keberangkatan', 
           'assets/icon/arah_biru.png',
           Colors.blue,
           widget.asalList,
@@ -236,8 +236,8 @@ class _FormPencarianTiketState extends State<FormPencarianTiket> {
           },
         ),
         const SizedBox(height: 16),
-        _bangunDropdownField(
-          'Pilih Tujuan',
+        _buildDropdownField(
+          'Pilih Titik Tujuan',
           'assets/icon/arah_merah.png',
           Colors.red,
           _asalTerpilih == null ? [] : widget.tujuanList,
@@ -255,7 +255,7 @@ class _FormPencarianTiketState extends State<FormPencarianTiket> {
             onPressed: () {
               if (_asalTerpilih != null && _tujuanTerpilih != null) {
                 widget.onCariTiketPressed(
-                    _asalTerpilih, _tujuanTerpilih); // Panggil callback
+                    _asalTerpilih, _tujuanTerpilih); 
               } else {
                 Fluttertoast.showToast(
                   msg: "Pilih asal dan tujuan terlebih dahulu!",
@@ -281,7 +281,7 @@ class _FormPencarianTiketState extends State<FormPencarianTiket> {
     );
   }
 
-  Widget _bangunDropdownField(
+  Widget _buildDropdownField(
     String labelText,
     String iconPath,
     Color iconColor,

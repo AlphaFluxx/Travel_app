@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class JadwalharianService {
-  static const String baseUrl = 'http://localhost:3306/admin/jadwalHarian/';
+  static const String baseUrl =
+      'http://192.168.110.123:3306/admin/jadwalHarian/';
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Function to get the token from storage
@@ -62,11 +63,6 @@ class JadwalharianService {
   static Future<void> updateJadwalHarian(
       int id, Map<String, dynamic> jadwalharian) async {
     final token = await getToken();
-
-    // Debugging log: Log the departure and arrival times
-    print('Updating JadwalHarian with ID $id:');
-    print('Departure Time: ${jadwalharian['waktu_berangkat']}');
-    print('Arrival Time: ${jadwalharian['waktu_kedatangan']}');
 
     final response = await http.put(
       Uri.parse('$baseUrl/$id'),

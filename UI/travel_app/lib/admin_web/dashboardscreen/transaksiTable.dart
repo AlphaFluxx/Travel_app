@@ -48,7 +48,7 @@ class TransaksiTableState extends State<TransaksiTable> {
                         DataColumn(label: Text('ID Pelanggan')),
                         DataColumn(label: Text('ID Jadwal')),
                         DataColumn(label: Text('ID Kursi')),
-                        DataColumn(label: Text('Tanggal')),
+                        DataColumn(label: Text('Tanggal Reservasi')),
                         DataColumn(label: Text('Status Transaksi')),
                       ],
                       rows: transaksiData.map((transaksi) {
@@ -73,7 +73,8 @@ class TransaksiTableState extends State<TransaksiTable> {
                                 Text(transaksi['id_pelanggan'].toString())),
                             DataCell(Text(transaksi['id_jadwal'].toString())),
                             DataCell(Text(transaksi['id_kursi'].toString())),
-                            DataCell(Text(transaksi['tanggal'].toString())),
+                            DataCell(Text(
+                                transaksi['tanggal_reservasi'].toString())),
                             DataCell(
                                 Text(transaksi['status_transaksi'].toString())),
                           ],
