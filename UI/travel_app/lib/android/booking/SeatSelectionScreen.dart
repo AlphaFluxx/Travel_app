@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'jadwalScreen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../payment/payment.dart';
 
 class SeatSelectionScreen extends StatefulWidget {
   final String asal;
@@ -177,8 +178,25 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
   }
 
   void _onPilihPressed() {
-    if (selectedSeat != -1) {
-      print('Nomor kursi yang dipilih: $nomor_kursi');
+    if (selectedSeat != -1 && nomor_kursi != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentScreen(
+            asal: widget.asal,
+            tujuan: widget.tujuan,
+            tanggal: widget.tanggal,
+            waktuBerangkat: widget.waktu_berangkat,
+            waktuKedatangan: widget.waktu_kedatangan,
+            idJadwal: widget.idJadwal,
+            idPelanggan: widget.idPelanggan,
+            harga: widget.harga,
+            jenisKendaraan: widget.jenisKendaraan,
+            idKendaraan: widget.idKendaraan,
+            nomor_kursi: int.parse(nomor_kursi!),
+          ),
+        ),
+      );
     } else {
       Fluttertoast.showToast(
         msg: "Pilih kursi terlebih dahulu",

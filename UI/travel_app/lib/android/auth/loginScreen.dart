@@ -10,13 +10,14 @@ import 'package:travel_app/android/widget/animations.dart';
 import '../home/homeScreen.dart';
 
 class LoginScreen extends StatelessWidget {
-  // Inisialisasi FlutterSecureStorage
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController emailController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
+    final TextEditingController emailController =
+        TextEditingController(text: 'dimas@gmail.com');
+    final TextEditingController passwordController =
+        TextEditingController(text: 'dimas123');
 
     Future<void> _loginUser(String email, String password) async {
       final String url = 'http://192.168.110.123:3306/pelanggan/akun/login';
@@ -38,6 +39,10 @@ class LoginScreen extends StatelessWidget {
             await _secureStorage.write(
                 key: 'idpelanggan',
                 value: data['user']['id_pelanggan'].toString());
+            await _secureStorage.write(
+                key: 'Nama', value: data['user']['nama']);
+            await _secureStorage.write(
+                key: 'email', value: data['user']['email']);
 
             Fluttertoast.showToast(
               msg: "Login Successful",

@@ -25,9 +25,9 @@ class MyApp extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasData && snapshot.data == true) {
-            return HomeScreen(); // Menampilkan HomeScreen jika token ditemukan
+            return HomeScreen();
           } else {
-            return SplashScreen(); // Ganti dengan halaman login jika token tidak ditemukan
+            return SplashScreen();
           }
         },
       ),

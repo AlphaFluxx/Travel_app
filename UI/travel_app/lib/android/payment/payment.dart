@@ -1,171 +1,304 @@
 import 'package:flutter/material.dart';
-import '../booking/ticket_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/intl.dart';
+import '../service/paymentService.dart';
 
-class PaymentScreen extends StatelessWidget {
-  // final String asal;
-  // final String tujuan;
-  // final String date;
-  // final String time;
-  // final int seat;
-
-  const PaymentScreen({
-    super.key,
-    // required this.asal,
-    // required this.tujuan,
-    // required this.date,
-    // required this.time,
-    // required this.seat,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        // home: PaymentMethodScreen(
-        // asal: asal,
-        // tujuan: tujuan,
-        // date: date,
-        // time: time,
-        // seat: seat,
-        //   ),
-        //   debugShowCheckedModeBanner: false,
-        );
-  }
-}
-
-class PaymentMethodScreen extends StatefulWidget {
+class PaymentScreen extends StatefulWidget {
   final String asal;
   final String tujuan;
-  final String date;
-  final String time;
-  final int seat;
+  final String tanggal;
+  final String waktuBerangkat;
+  final String waktuKedatangan;
+  final int idJadwal;
+  final int idPelanggan;
+  final String jenisKendaraan;
+  final int nomor_kursi;
+  final int harga;
 
-  const PaymentMethodScreen({
-    super.key,
+  PaymentScreen({
     required this.asal,
     required this.tujuan,
-    required this.date,
-    required this.time,
-    required this.seat,
+    required this.tanggal,
+    required this.waktuBerangkat,
+    required this.waktuKedatangan,
+    required this.idJadwal,
+    required this.idPelanggan,
+    required this.harga,
+    required this.jenisKendaraan,
+    required int idKendaraan,
+    required this.nomor_kursi,
   });
 
   @override
-  _PaymentMethodScreenState createState() => _PaymentMethodScreenState();
+  _PaymentScreenState createState() => _PaymentScreenState();
 }
 
-class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
-  int selectedIndex = -1; // Track the selected card index
+class _PaymentScreenState extends State<PaymentScreen> {
+  final _secureStorage = const FlutterSecureStorage();
+  String? nama;
+  String? email;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNama();
+  }
+
+  Future<void> _handlePayment() async {
+    final orderId = "ORDER-${DateTime.now().millisecondsSinceEpoch}";
+
+    void _showMessage(String message) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+
+    final requestData = {
+      "orderId": orderId,
+      "grossAmount": widget.harga,
+      "customerDetails": {
+        "first_name": nama ?? "Unknown",
+        "last_name": "",
+        "email": email ?? "unknown@gmail.com",
+        "phone": "081234567890"
+      }
+    };
+
+    print("Request Data: $requestData");
+
+    PaymentService.processPayment(
+      orderId: orderId,
+      grossAmount: widget.harga,
+      firstName: nama ?? "Unknown",
+      email: email ?? "unknown@gmail.com",
+      onSuccess: (paymentUrl) async {
+        print("Payment URL received: $paymentUrl");
+        try {
+          await PaymentService.openPaymentUrl(paymentUrl);
+        } catch (e) {
+          print("Error opening payment URL: $e");
+          _showMessage("Error membuka URL pembayaran: $e");
+        }
+      },
+      onError: (error) {
+        print("Error from server: $error");
+        _showMessage("Error dari server: $error");
+      },
+    );
+  }
+
+  Future<void> _fetchNama() async {
+    String? fetchedNama = await _secureStorage.read(key: 'Nama');
+    String? fetchedEmail = await _secureStorage.read(key: 'email');
+
+    setState(() {
+      nama = fetchedNama ?? 'Unknown';
+      email = fetchedEmail ?? 'Unknown';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        title: const Text(
-          'Pilih Metode Pembayaran',
-          style: TextStyle(color: Colors.white),
-        ),
-        centerTitle: true,
-        leading: Container(
-          margin: const EdgeInsets.all(8.0),
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            backgroundColor: const Color(0xFF1A1B1F),
-            foregroundColor: Colors.white,
-            tooltip: 'Back',
-            shape: const CircleBorder(),
-            child: ColorFiltered(
-              colorFilter:
-                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-              child: Image.asset('assets/icon/back.png'),
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF121111),
+              Color(0xFFE121111),
+              Color(0xFFF1211111),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            PaymentMethodCard(
-              isSelected: selectedIndex == 0,
-              onTap: () {
-                setState(() {
-                  selectedIndex = 0;
-                });
-              },
+            // Header
+            Container(
+              height: 200,
+              decoration: const BoxDecoration(
+                color: Color(0xFF121111),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo Checkmark
+                  Image.asset(
+                    'assets/image/logo_final_white.png',
+                    width: 200,
+                    height: 150,
+                  ),
+                  const SizedBox(height: 5),
+                  const Text(
+                    "Payment",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            PaymentMethodCard(
-              isSelected: selectedIndex == 1,
-              onTap: () {
-                setState(() {
-                  selectedIndex = 1;
-                });
-              },
-            ),
-            PaymentMethodCard(
-              isSelected: selectedIndex == 2,
-              onTap: () {
-                setState(() {
-                  selectedIndex = 2;
-                });
-              },
-            ),
-            const Spacer(),
-            ConfirmButton(
-              asal: widget.asal,
-              tujuan: widget.tujuan,
-              date: widget.date,
-              time: widget.time,
-              seat: widget.seat,
+            // Content
+            Expanded(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40),
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+                      _buildSectionHeader("Ringkasan Pesanan"),
+                      _buildCard(
+                        child: Column(
+                          children: [
+                            _buildRow("Nama", nama ?? 'Loading...'),
+                            _buildRow("Email", email ?? 'Loading...'),
+                            _buildRow("Titik Penjemputan", widget.asal),
+                            _buildRow("Titik Tujuan", widget.tujuan),
+                            _buildRow("Tanggal", widget.tanggal),
+                            _buildRow(
+                                "Waktu Keberangkatan", widget.waktuBerangkat),
+                            _buildRow(
+                                "Waktu Kedatangan", widget.waktuKedatangan),
+                            _buildRow("Jenis Armada", widget.jenisKendaraan),
+                            _buildRow(
+                                "Nomor Kursi", widget.nomor_kursi.toString()),
+                            _buildRow("Harga", _formatCurrency(widget.harga)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Space for vehicle image
+                      if (widget.jenisKendaraan.toLowerCase() == 'hiace') ...[
+                        Center(
+                          child: Image.asset(
+                            'assets/image/hiace.png',
+                            width: 230,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ] else if (widget.jenisKendaraan.toLowerCase() ==
+                          'bus') ...[
+                        Center(
+                          child: Image.asset(
+                            'assets/image/bus.png',
+                            width: 230,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ] else ...[
+                        const Center(
+                          child: Text(
+                            "Gambar tidak tersedia untuk jenis armada ini",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _handlePayment();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF12D1DD),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            "Bayar",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
         ),
       ),
-      backgroundColor: Colors.black,
     );
   }
-}
 
-class PaymentMethodCard extends StatelessWidget {
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  PaymentMethodCard({required this.isSelected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.cyan : Colors.white,
-        borderRadius: BorderRadius.circular(8.0),
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
       ),
+    );
+  }
+
+  Widget _buildCard({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildRow(String title, String value, {bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: onTap,
-            child: Container(
-              width: 200,
-              height: 30,
-              color: Colors.grey[300],
-            ),
+          Text(
+            title,
+            style: const TextStyle(color: Colors.black54),
           ),
-          OutlinedButton(
-            onPressed: onTap,
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(
-                color: isSelected ? Colors.white : Colors.cyan,
-              ),
-            ),
-            child: Text(
-              'Cara Kerja',
-              style: TextStyle(
-                color: isSelected ? Colors.white : Color(0xFF12D1DD),
-              ),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
           ),
         ],
@@ -174,46 +307,11 @@ class PaymentMethodCard extends StatelessWidget {
   }
 }
 
-class ConfirmButton extends StatelessWidget {
-  final String asal;
-  final String tujuan;
-  final String date;
-  final String time;
-  final int seat;
-
-  const ConfirmButton({
-    super.key,
-    required this.asal,
-    required this.tujuan,
-    required this.date,
-    required this.time,
-    required this.seat,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => TicketScreen(
-                asal: asal,
-                tujuan: tujuan,
-                date: date,
-                time: time,
-                seat: seat,
-              ),
-            ),
-          );
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.cyan,
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-        ),
-        child: const Text('Konfirmasi', style: TextStyle(color: Colors.white)),
-      ),
-    );
-  }
+String _formatCurrency(int amount) {
+  final formatter = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp',
+    decimalDigits: 0,
+  );
+  return formatter.format(amount);
 }
