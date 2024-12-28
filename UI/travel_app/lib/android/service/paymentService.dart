@@ -8,6 +8,7 @@ class PaymentService {
     required int grossAmount,
     required String firstName,
     required String email,
+    required String token, // Tambahkan token sebagai parameter
     required Function(String paymentUrl) onSuccess,
     required Function(String error) onError,
   }) async {
@@ -19,27 +20,23 @@ class PaymentService {
         "last_name": "",
         "email": email,
         "phone": "081234567890"
-      }
+      },
+      "token": token // Sertakan token dalam data request
     };
-
-    print("Sending request: $requestData");
 
     try {
       final response = await http.post(
         Uri.parse("http://192.168.110.123:3306/pelanggan/payment/create"),
         headers: {
           "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
         },
         body: json.encode(requestData),
       );
 
-      print("Response status: ${response.statusCode}");
-      print("Response body: ${response.body}");
-
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        final paymentUrl =
-            jsonResponse['redirect_url']; // Fixed to 'redirect_url'
+        final paymentUrl = jsonResponse['redirect_url'];
         if (paymentUrl != null) {
           onSuccess(paymentUrl);
         } else {
@@ -50,7 +47,6 @@ class PaymentService {
             "Gagal memproses pembayaran. Kode status: ${response.statusCode}");
       }
     } catch (e) {
-      print("Error during payment request: $e");
       onError("Terjadi kesalahan: $e");
     }
   }
@@ -58,12 +54,43 @@ class PaymentService {
   static Future<void> openPaymentUrl(String paymentUrl) async {
     final Uri url = Uri.parse(paymentUrl);
 
-    // Memeriksa apakah URL dapat diluncurkan
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.inAppWebView);
     } else {
-      print('Tidak dapat membuka URL: $paymentUrl');
       throw Exception('Tidak dapat membuka URL pembayaran.');
+    }
+  }
+
+  static Future<Map<String, dynamic>> checkTransactionStatus(
+      String orderId, String token) async {
+    final url =
+        'http://192.168.110.123:3306/pelanggan/payment/notifications/$orderId';
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print("Request URL: $url");
+      print("Response Status Code: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        print("Response Body: $result");
+        return {
+          "status":
+              result['transaction_status'] == 'success' ? 'success' : 'failed'
+        };
+      } else {
+        throw Exception(
+            "Failed to fetch transaction status. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error fetching transaction status: $e");
+      throw Exception("Failed to fetch transaction status");
     }
   }
 }

@@ -37,6 +37,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   final _secureStorage = const FlutterSecureStorage();
   String? nama;
   String? email;
+  late String token;
 
   @override
   void initState() {
@@ -56,47 +57,91 @@ class _PaymentScreenState extends State<PaymentScreen> {
       );
     }
 
+    // Validasi nama dan email sebelum melanjutkan
+    if (nama == null || nama!.isEmpty || email == null || email!.isEmpty) {
+      _showMessage("Nama dan email harus diisi sebelum melakukan pembayaran.");
+      return;
+    }
+
     final requestData = {
       "orderId": orderId,
       "grossAmount": widget.harga,
       "customerDetails": {
-        "first_name": nama ?? "Unknown",
+        "first_name": nama!,
         "last_name": "",
-        "email": email ?? "unknown@gmail.com",
+        "email": email!,
         "phone": "081234567890"
       }
     };
 
     print("Request Data: $requestData");
 
-    PaymentService.processPayment(
-      orderId: orderId,
-      grossAmount: widget.harga,
-      firstName: nama ?? "Unknown",
-      email: email ?? "unknown@gmail.com",
-      onSuccess: (paymentUrl) async {
-        print("Payment URL received: $paymentUrl");
-        try {
-          await PaymentService.openPaymentUrl(paymentUrl);
-        } catch (e) {
-          print("Error opening payment URL: $e");
-          _showMessage("Error membuka URL pembayaran: $e");
-        }
-      },
-      onError: (error) {
-        print("Error from server: $error");
-        _showMessage("Error dari server: $error");
-      },
-    );
+    try {
+      PaymentService.processPayment(
+        orderId: orderId,
+        grossAmount: widget.harga,
+        firstName: nama ?? "Unknown",
+        email: email ?? "unknown@gmail.com",
+        token: token,
+        onSuccess: (paymentUrl) async {
+          print("Payment URL received: $paymentUrl");
+          try {
+            await PaymentService.openPaymentUrl(paymentUrl);
+
+            // Mendapatkan status transaksi
+            final notificationResult =
+                await PaymentService.checkTransactionStatus(orderId, token);
+
+            if (notificationResult['status'] == 'success') {
+              print("Pembayaran berhasil. Menampilkan hasil konfirmasi.");
+              // Navigator.pushReplacement(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => ConfirmationScreen(
+              //       orderId: orderId,
+              //       asal: widget.asal,
+              //       tujuan: widget.tujuan,
+              //       tanggal: widget.tanggal,
+              //       waktuBerangkat: widget.waktuBerangkat,
+              //       waktuKedatangan: widget.waktuKedatangan,
+              //       jenisKendaraan: widget.jenisKendaraan,
+              //       nomorKursi: widget.nomor_kursi,
+              //       harga: widget.harga,
+              //     ),
+              //   ),
+              // );
+            } else {
+              _showMessage("Pembayaran gagal. Silakan coba lagi.");
+            }
+          } catch (e) {
+            print("Error handling payment: $e");
+            _showMessage("Error memproses pembayaran: $e");
+          }
+        },
+        onError: (error) {
+          print("Error from server: $error");
+          _showMessage("Error dari server: $error");
+        },
+      );
+    } catch (e) {
+      print("Error processing payment: $e");
+      _showMessage("Terjadi kesalahan: $e");
+    }
   }
 
   Future<void> _fetchNama() async {
     String? fetchedNama = await _secureStorage.read(key: 'Nama');
     String? fetchedEmail = await _secureStorage.read(key: 'email');
-
+    String? fetchedToken = await _secureStorage.read(key: 'jwt_token');
+    if (fetchedToken != null) {
+      print("Token berhasil diambil: $fetchedToken");
+    } else {
+      print("Token tidak ditemukan di storage.");
+    }
     setState(() {
       nama = fetchedNama ?? 'Unknown';
       email = fetchedEmail ?? 'Unknown';
+      token = fetchedToken ?? '';
     });
   }
 
