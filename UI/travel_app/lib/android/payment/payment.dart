@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import '../service/paymentService.dart';
+import 'package:uni_links/uni_links.dart';
+import 'package:flutter/widgets.dart';
 
 class PaymentScreen extends StatefulWidget {
   final String asal;
@@ -14,20 +17,21 @@ class PaymentScreen extends StatefulWidget {
   final String jenisKendaraan;
   final int nomor_kursi;
   final int harga;
+  final int idKursi;
 
-  PaymentScreen({
-    required this.asal,
-    required this.tujuan,
-    required this.tanggal,
-    required this.waktuBerangkat,
-    required this.waktuKedatangan,
-    required this.idJadwal,
-    required this.idPelanggan,
-    required this.harga,
-    required this.jenisKendaraan,
-    required int idKendaraan,
-    required this.nomor_kursi,
-  });
+  PaymentScreen(
+      {required this.asal,
+      required this.tujuan,
+      required this.tanggal,
+      required this.waktuBerangkat,
+      required this.waktuKedatangan,
+      required this.idJadwal,
+      required this.idPelanggan,
+      required this.harga,
+      required this.jenisKendaraan,
+      required int idKendaraan,
+      required this.nomor_kursi,
+      required this.idKursi});
 
   @override
   _PaymentScreenState createState() => _PaymentScreenState();
@@ -39,14 +43,93 @@ class _PaymentScreenState extends State<PaymentScreen> {
   String? email;
   late String token;
 
+  StreamSubscription? _linkSubscription;
+
   @override
   void initState() {
     super.initState();
     _fetchNama();
+    _initDeepLinkListener();
+  }
+
+  // Fungsi untuk menangani callback deep link
+  Future<void> _initDeepLinkListener() async {
+    try {
+      _linkSubscription = uriLinkStream.listen((Uri? uri) async {
+        if (uri != null) {
+          print('Received deep link: $uri');
+          print('Query parameters: ${uri.queryParameters}');
+
+          // Ambil parameter yang diperlukan dari deep link
+          String? orderId =
+              uri.queryParameters['order_id']; // order_id untuk Midtrans
+          String? idTransaksi = uri.queryParameters[
+              'id_transaksi']; // id_transaksi untuk sistem lokal
+          String? statusCode = uri.queryParameters['status_code'];
+          String? transactionStatus = uri.queryParameters['transaction_status'];
+
+          // Debugging untuk memeriksa nilai yang diterima
+          print(
+              'Debug: orderId = $orderId, idTransaksi = $idTransaksi, statusCode = $statusCode, transactionStatus = $transactionStatus');
+
+          // Cek jika id_transaksi ada di deep link
+          if (idTransaksi != null &&
+              statusCode == '200' &&
+              transactionStatus == 'settlement') {
+            // Lakukan navigasi atau update status kursi
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                Navigator.pushReplacementNamed(context, '/payment-success',
+                    arguments: {
+                      'idTransaksi':
+                          idTransaksi, // Kirim id_transaksi yang benar
+                      'statusCode': statusCode,
+                      'transactionStatus': transactionStatus,
+                      'nama': nama ?? 'Unknown',
+                      'email': email ?? 'Unknown',
+                      'titikPenjemputan': widget.asal,
+                      'titikTujuan': widget.tujuan,
+                      'tanggal': widget.tanggal,
+                      'waktuKeberangkatan': widget.waktuBerangkat,
+                      'waktuKedatangan': widget.waktuKedatangan,
+                      'jenisArmada': widget.jenisKendaraan,
+                      'nomorKursi': widget.nomor_kursi.toString(),
+                      'harga': widget.harga,
+                    });
+              }
+            });
+
+            try {
+              // Update status kursi menggunakan id_transaksi yang sesuai
+              await PaymentService.updateSeatStatus(
+                widget.idKursi.toString(),
+                false,
+                idTransaksi,
+                transactionStatus!,
+              );
+              print("Seat status updated successfully");
+            } catch (e) {
+              print("Failed to update seat status: $e");
+            }
+          } else {
+            print('Invalid id_transaksi or transaction_status');
+          }
+        }
+      });
+    } catch (e) {
+      print("Error while processing deep link: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _handlePayment() async {
-    final orderId = "ORDER-${DateTime.now().millisecondsSinceEpoch}";
+    final orderId =
+        "${widget.idPelanggan}-${DateTime.now().millisecondsSinceEpoch}";
 
     void _showMessage(String message) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -57,78 +140,43 @@ class _PaymentScreenState extends State<PaymentScreen> {
       );
     }
 
-    // Validasi nama dan email sebelum melanjutkan
     if (nama == null || nama!.isEmpty || email == null || email!.isEmpty) {
       _showMessage("Nama dan email harus diisi sebelum melakukan pembayaran.");
       return;
     }
 
-    final requestData = {
-      "orderId": orderId,
-      "grossAmount": widget.harga,
-      "customerDetails": {
-        "first_name": nama!,
-        "last_name": "",
-        "email": email!,
-        "phone": "081234567890"
-      }
-    };
-
-    print("Request Data: $requestData");
-
     try {
-      PaymentService.processPayment(
-        orderId: orderId,
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Proses pembayaran
+      await PaymentService.processPayment(
+        idPelanggan: widget.idPelanggan,
+        idKursi: widget.idKursi.toString(),
+        idJadwal: widget.idJadwal.toString(),
+        idTransaksi: orderId,
         grossAmount: widget.harga,
         firstName: nama ?? "Unknown",
         email: email ?? "unknown@gmail.com",
         token: token,
         onSuccess: (paymentUrl) async {
-          print("Payment URL received: $paymentUrl");
-          try {
-            await PaymentService.openPaymentUrl(paymentUrl);
-
-            // Mendapatkan status transaksi
-            final notificationResult =
-                await PaymentService.checkTransactionStatus(orderId, token);
-
-            if (notificationResult['status'] == 'success') {
-              print("Pembayaran berhasil. Menampilkan hasil konfirmasi.");
-              // Navigator.pushReplacement(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => ConfirmationScreen(
-              //       orderId: orderId,
-              //       asal: widget.asal,
-              //       tujuan: widget.tujuan,
-              //       tanggal: widget.tanggal,
-              //       waktuBerangkat: widget.waktuBerangkat,
-              //       waktuKedatangan: widget.waktuKedatangan,
-              //       jenisKendaraan: widget.jenisKendaraan,
-              //       nomorKursi: widget.nomor_kursi,
-              //       harga: widget.harga,
-              //     ),
-              //   ),
-              // );
-            } else {
-              _showMessage("Pembayaran gagal. Silakan coba lagi.");
-            }
-          } catch (e) {
-            print("Error handling payment: $e");
-            _showMessage("Error memproses pembayaran: $e");
-          }
+          await PaymentService.openPaymentUrl(paymentUrl);
         },
         onError: (error) {
-          print("Error from server: $error");
-          _showMessage("Error dari server: $error");
+          _showMessage("Pembayaran gagal: $error. Silakan coba lagi.");
         },
       );
-    } catch (e) {
-      print("Error processing payment: $e");
-      _showMessage("Terjadi kesalahan: $e");
+    } finally {
+      Navigator.pop(context); // Menutup dialog loading
     }
   }
 
+  // Fungsi untuk mengambil data pengguna dari secure storage
   Future<void> _fetchNama() async {
     String? fetchedNama = await _secureStorage.read(key: 'Nama');
     String? fetchedEmail = await _secureStorage.read(key: 'email');
@@ -164,7 +212,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ),
         child: Column(
           children: [
-            // Header
             Container(
               height: 200,
               decoration: const BoxDecoration(
@@ -177,7 +224,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo Checkmark
                   Image.asset(
                     'assets/image/logo_final_white.png',
                     width: 200,
@@ -195,7 +241,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ],
               ),
             ),
-            // Content
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
@@ -231,39 +276,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      // Space for vehicle image
-                      if (widget.jenisKendaraan.toLowerCase() == 'hiace') ...[
-                        Center(
-                          child: Image.asset(
-                            'assets/image/hiace.png',
-                            width: 230,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ] else if (widget.jenisKendaraan.toLowerCase() ==
-                          'bus') ...[
-                        Center(
-                          child: Image.asset(
-                            'assets/image/bus.png',
-                            width: 230,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ] else ...[
-                        const Center(
-                          child: Text(
-                            "Gambar tidak tersedia untuk jenis armada ini",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
                       const SizedBox(height: 16),
                       Center(
                         child: ElevatedButton(
@@ -347,6 +359,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
       ),
     );
   }

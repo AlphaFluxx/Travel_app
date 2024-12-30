@@ -22,6 +22,7 @@ class KursiService {
             .map((kursi) => {
                   "nomor_kursi": kursi["nomor_kursi"],
                   "statusKetersediaan": kursi["statusKetersediaan"],
+                  "id_kursi": kursi["id_kursi"],
                 })
             .toList();
       } else {

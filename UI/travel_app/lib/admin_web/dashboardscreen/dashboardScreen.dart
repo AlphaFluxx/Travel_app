@@ -475,6 +475,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               String id = KendaraanTableState
                                   .selectedRowKendaraan!['id_kendaraan']
                                   .toString();
+                              print(
+                                  "ID Kendaraan yang akan dihapus: $id"); // Tambahkan log untuk memastikan ID kendaraan
                               _deleteData(id, activeTable);
                             } else if (activeTable == 'kursi' &&
                                 KursiTableState.selectedRowKursi != null) {

@@ -44,6 +44,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
 
   int selectedSeat = -1;
   String? nomor_kursi;
+  String? id_kursi;
 
   @override
   void initState() {
@@ -145,11 +146,8 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
             orElse: () => {},
           );
 
-          // Debug: Log kursi yang dicocokkan dan statusnya
-          print("Memeriksa kursi: $seat, Ditemukan: $kursi");
-
           return kursi.isNotEmpty && kursi['statusKetersediaan'] == true
-              ? seat
+              ? kursi['id_kursi']?.toString()
               : null;
         }).toList();
       });
@@ -174,6 +172,15 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
     setState(() {
       selectedSeat = index;
       nomor_kursi = seat;
+
+      final kursi = fetchedSeats[index];
+      if (kursi != null) {
+        id_kursi = kursi; 
+        print("Kursi dipilih: $seat, ID Kursi: $id_kursi");
+      } else {
+        id_kursi = null;
+        print("Kursi tidak tersedia: $seat");
+      }
     });
   }
 
@@ -194,6 +201,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
             jenisKendaraan: widget.jenisKendaraan,
             idKendaraan: widget.idKendaraan,
             nomor_kursi: int.parse(nomor_kursi!),
+            idKursi: int.parse(id_kursi!),
           ),
         ),
       );

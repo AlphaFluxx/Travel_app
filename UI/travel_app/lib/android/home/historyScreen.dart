@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '/android/widget/CustomBottomNavigationBar.dart'; 
+import '/android/widget/CustomBottomNavigationBar.dart';
 
 class HistoryScreen extends StatefulWidget {
   @override
@@ -19,7 +19,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0), 
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -31,9 +31,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
-            ), 
+            ),
             const SizedBox(height: 16),
-            Expanded(child: TicketList()), 
+            Expanded(child: TicketList()),
           ],
         ),
       ),
@@ -50,18 +50,16 @@ class TicketList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: 3, 
+      itemCount: 3,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () {
-            
-          },
+          onTap: () {},
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: const Color(0xFF2A2B2E), 
+                color: const Color(0xFF2A2B2E),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
